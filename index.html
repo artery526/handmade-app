@@ -30,10 +30,7 @@
       min-height: 100vh;
       font-family: "Noto Serif TC", serif;
       color: var(--ink);
-      background:
-        linear-gradient(180deg, rgba(255, 248, 239, 0.08), rgba(255, 248, 239, 0.24) 62%, #fffaf4 100%),
-        url("assets/emily-brand-bg.png") center top / cover no-repeat fixed,
-        #fff7ee;
+      background: #fff7ee;
     }
 
     a { color: inherit; }
@@ -66,7 +63,10 @@
       flex-direction: column;
       line-height: 1;
       min-width: 0;
+      margin-left: -14px;
+      padding: 4px 0 4px 14px;
       text-decoration: none;
+      overflow: visible;
     }
 
     .brand strong {
@@ -149,9 +149,16 @@
     }
 
     .hero {
-      min-height: calc(100vh - 68px);
       width: 100%;
       margin: 0 auto;
+      overflow: hidden;
+      background: #fff7ee;
+    }
+
+    .hero-image {
+      display: block;
+      width: 100%;
+      height: auto;
     }
 
     main {
@@ -504,10 +511,6 @@
     }
 
     @media (max-width: 900px) {
-      .hero {
-        min-height: calc(100vh - 68px);
-      }
-
       .products, .planning-grid {
         grid-template-columns: 1fr;
       }
@@ -532,17 +535,13 @@
         letter-spacing: 0.08em;
       }
 
-      .brand-sub, .pill-link {
+      .brand-sub {
         display: none;
       }
 
       .cart-button {
         min-height: 38px;
         padding: 0 12px;
-      }
-
-      .hero {
-        min-height: calc(100vh - 62px);
       }
 
       .section {
@@ -581,8 +580,6 @@
         <span class="brand-sub">Handmade with Love</span>
       </a>
       <div class="nav-actions">
-        <a class="pill-link" href="#products">作品櫃</a>
-        <a class="pill-link" href="#plan">試算表規劃</a>
         <button class="cart-button" type="button" id="openCart">
           購物清單 <span class="cart-count" id="cartCount">0</span>
         </button>
@@ -590,7 +587,9 @@
     </nav>
   </header>
 
-  <section class="hero" id="top" aria-label="Emily 手作工坊主視覺"></section>
+  <section class="hero" id="top" aria-label="Emily 手作工坊主視覺">
+    <img class="hero-image" src="assets/emily-brand-bg.png" alt="Emily 手作工坊主視覺">
+  </section>
 
   <main>
     <section class="section" id="products">
