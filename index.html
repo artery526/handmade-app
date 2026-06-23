@@ -6,7 +6,7 @@
   <title>Emily 手作工坊 | Handmade with Love</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Serif+TC:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --ink: #66503e;
@@ -31,8 +31,8 @@
       font-family: "Noto Serif TC", serif;
       color: var(--ink);
       background:
-        linear-gradient(180deg, rgba(255, 248, 239, 0.38), rgba(255, 248, 239, 0.94) 42%, #fffaf4 100%),
-        url("assets/emily-brand-bg.png") center top / min(100vw, 980px) auto no-repeat,
+        linear-gradient(180deg, rgba(255, 248, 239, 0.08), rgba(255, 248, 239, 0.24) 62%, #fffaf4 100%),
+        url("assets/emily-brand-bg.png") center top / cover no-repeat fixed,
         #fff7ee;
     }
 
@@ -64,17 +64,39 @@
     .brand {
       display: flex;
       flex-direction: column;
-      line-height: 1.1;
+      line-height: 1;
       min-width: 0;
+      text-decoration: none;
     }
 
     .brand strong {
-      font-size: 20px;
-      letter-spacing: 0.08em;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
       white-space: nowrap;
     }
 
-    .brand span {
+    .brand-emily {
+      font-family: "Great Vibes", cursive;
+      font-size: 38px;
+      font-weight: 400;
+      letter-spacing: 0;
+      background: linear-gradient(110deg, #8d6850 0%, #c98273 46%, #6f533f 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 4px 18px rgba(161, 102, 78, 0.18);
+    }
+
+    .brand-cn {
+      color: #6d503d;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 8px 18px rgba(109,80,61,0.12);
+    }
+
+    .brand-sub {
       margin-top: 4px;
       color: var(--muted);
       font-size: 12px;
@@ -127,72 +149,9 @@
     }
 
     .hero {
-      min-height: 680px;
-      width: min(1120px, calc(100% - 32px));
+      min-height: calc(100vh - 68px);
+      width: 100%;
       margin: 0 auto;
-      padding: 118px 0 44px;
-      display: grid;
-      align-items: end;
-    }
-
-    .hero-copy {
-      width: min(560px, 100%);
-      padding-top: 270px;
-    }
-
-    .eyebrow {
-      color: var(--rose);
-      font-family: "Noto Sans TC", sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 14px 0 16px;
-      font-size: clamp(42px, 7vw, 76px);
-      line-height: 1.05;
-      letter-spacing: 0;
-    }
-
-    .hero p {
-      margin: 0;
-      max-width: 500px;
-      color: #765e4a;
-      font-size: 18px;
-      line-height: 1.9;
-    }
-
-    .hero-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 28px;
-    }
-
-    .primary-link, .secondary-link {
-      min-height: 48px;
-      border-radius: 999px;
-      padding: 0 22px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      font-weight: 700;
-    }
-
-    .primary-link {
-      background: var(--rose);
-      color: white;
-      border-color: transparent;
-    }
-
-    .secondary-link {
-      background: rgba(255,255,255,0.62);
-      color: var(--ink);
     }
 
     main {
@@ -545,18 +504,8 @@
     }
 
     @media (max-width: 900px) {
-      body {
-        background-size: 900px auto;
-        background-position: center 70px;
-      }
-
       .hero {
-        min-height: 720px;
-        padding-top: 92px;
-      }
-
-      .hero-copy {
-        padding-top: 360px;
+        min-height: calc(100vh - 68px);
       }
 
       .products, .planning-grid {
@@ -571,10 +520,19 @@
       }
 
       .brand strong {
-        font-size: 16px;
+        gap: 6px;
       }
 
-      .brand span, .pill-link {
+      .brand-emily {
+        font-size: 31px;
+      }
+
+      .brand-cn {
+        font-size: 15px;
+        letter-spacing: 0.08em;
+      }
+
+      .brand-sub, .pill-link {
         display: none;
       }
 
@@ -583,25 +541,12 @@
         padding: 0 12px;
       }
 
-      .hero, .section {
-        width: min(100% - 24px, 1120px);
-      }
-
       .hero {
-        min-height: 660px;
-        padding-bottom: 30px;
+        min-height: calc(100vh - 62px);
       }
 
-      .hero-copy {
-        padding-top: 360px;
-      }
-
-      h1 {
-        font-size: 40px;
-      }
-
-      .hero p {
-        font-size: 16px;
+      .section {
+        width: min(100% - 24px, 1120px);
       }
 
       .section-head {
@@ -632,8 +577,8 @@
   <header class="site-header">
     <nav class="nav" aria-label="主選單">
       <a class="brand" href="#top" aria-label="回到 Emily 手作工坊首頁">
-        <strong>Emily 手作工坊</strong>
-        <span>Handmade with Love</span>
+        <strong><span class="brand-emily">Emily</span><span class="brand-cn">手作工坊</span></strong>
+        <span class="brand-sub">Handmade with Love</span>
       </a>
       <div class="nav-actions">
         <a class="pill-link" href="#products">作品櫃</a>
@@ -645,17 +590,7 @@
     </nav>
   </header>
 
-  <section class="hero" id="top">
-    <div class="hero-copy">
-      <div class="eyebrow">Crochet Bouquet / Coaster / Hair Tie</div>
-      <h1>Emily 手作工坊</h1>
-      <p>用雙手編織生活裡的小溫柔。第一版先把作品、價格、庫存和購買意願串到同一張試算表，之後上新只要補表格就能更新網站。</p>
-      <div class="hero-links">
-        <a class="primary-link" href="#products">看作品</a>
-        <a class="secondary-link" href="https://docs.google.com/spreadsheets/d/1wYmYKcggwnXcpCMUF--Pl0Hwi70UaQ5OhvM4Ob4yg8w/edit?usp=sharing" target="_blank" rel="noreferrer">打開商品表</a>
-      </div>
-    </div>
-  </section>
+  <section class="hero" id="top" aria-label="Emily 手作工坊主視覺"></section>
 
   <main>
     <section class="section" id="products">
