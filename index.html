@@ -232,11 +232,18 @@
       background-repeat: no-repeat;
     }
 
-    .category-image {
+    .category-image, .category-video {
       aspect-ratio: 16 / 9;
       border-radius: 8px;
       margin-bottom: 16px;
       border: 1px solid rgba(166, 126, 94, 0.16);
+    }
+
+    .category-video {
+      width: 100%;
+      object-fit: cover;
+      display: block;
+      background: #fff4e8;
     }
 
     .crop-bouquet { background-position: 5% 42%; }
@@ -928,7 +935,8 @@
         category: "編織花束",
         en: "Crochet Bouquet",
         description: "溫暖送禮首選，傳遞心意的花",
-        crop: "crop-bouquet"
+        crop: "crop-bouquet",
+        video: "flower.mp4"
       },
       {
         category: "編織杯墊",
@@ -1067,7 +1075,9 @@
     function renderCategories() {
       categoryGrid.innerHTML = categoryCards.map(card => `
         <article class="category-card">
-          <div class="category-image ${card.crop}" aria-hidden="true"></div>
+          ${card.video
+            ? `<video class="category-video" src="${escapeAttr(card.video)}" autoplay muted loop playsinline preload="metadata" aria-label="${escapeAttr(card.category)}動態展示"></video>`
+            : `<div class="category-image ${card.crop}" aria-hidden="true"></div>`}
           <h3>${escapeHtml(card.category)}</h3>
           <div class="category-en">${escapeHtml(card.en)}</div>
           <p>${escapeHtml(card.description)}</p>
