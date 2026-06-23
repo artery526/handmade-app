@@ -162,13 +162,17 @@
     }
 
     main {
-      background: linear-gradient(180deg, rgba(255,250,244,0.72), #fffaf4 8%);
+      background: linear-gradient(180deg, #fffaf4 0%, #fff8ef 58%, #fff4e8 100%);
     }
 
     .section {
       width: min(1120px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 58px 0;
+      padding: 46px 0;
+    }
+
+    .section-centered {
+      text-align: center;
     }
 
     .section-head {
@@ -179,10 +183,19 @@
       margin-bottom: 22px;
     }
 
+    .section-head-centered {
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
     .section-title h2 {
       margin: 0 0 8px;
       font-size: clamp(28px, 4vw, 44px);
       line-height: 1.15;
+      letter-spacing: 0.12em;
     }
 
     .section-title p {
@@ -197,6 +210,202 @@
       font-family: "Noto Sans TC", sans-serif;
       font-size: 13px;
       white-space: nowrap;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .category-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: 0 14px 38px rgba(109, 77, 53, 0.1);
+      padding: 14px;
+    }
+
+    .category-image, .popular-image, .story-photo, .story-flower {
+      background-image: url("assets/emily-hero-wide.png");
+      background-size: 250% auto;
+      background-repeat: no-repeat;
+    }
+
+    .category-image {
+      aspect-ratio: 16 / 9;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(166, 126, 94, 0.16);
+    }
+
+    .crop-bouquet { background-position: 5% 42%; }
+    .crop-coaster { background-position: 66% 58%; }
+    .crop-hairtie { background-position: 97% 48%; }
+    .crop-story { background-position: 24% 72%; }
+    .crop-flower { background-position: 92% 62%; }
+
+    .category-card h3 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: 0.08em;
+    }
+
+    .category-en {
+      margin-top: 4px;
+      color: var(--rose);
+      font-family: "Dancing Script", cursive;
+      font-size: 19px;
+    }
+
+    .category-card p {
+      margin: 12px 0 16px;
+      color: #806852;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .category-link, .more-link {
+      min-height: 38px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.64);
+      color: var(--ink);
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .popular-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .popular-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.74);
+      box-shadow: 0 14px 36px rgba(109, 77, 53, 0.09);
+      text-align: left;
+    }
+
+    .popular-rank {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #eda68b;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Noto Sans TC", sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 8px 18px rgba(237, 166, 139, 0.32);
+    }
+
+    .popular-image {
+      aspect-ratio: 4 / 3;
+      background-size: 270% auto;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .popular-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .popular-body {
+      padding: 14px 16px 16px;
+    }
+
+    .popular-body h3 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      line-height: 1.4;
+    }
+
+    .popular-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .heart-button {
+      border: 0;
+      background: transparent;
+      color: var(--rose);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .heart-button[disabled] {
+      color: #d8c7b8;
+      cursor: not-allowed;
+    }
+
+    .story-panel {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr 0.8fr;
+      gap: 26px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.66);
+      box-shadow: 0 14px 42px rgba(109, 77, 53, 0.1);
+      padding: 18px;
+    }
+
+    .story-photo, .story-flower {
+      min-height: 210px;
+      border-radius: 8px;
+      border: 1px solid rgba(166, 126, 94, 0.16);
+    }
+
+    .story-copy h2 {
+      margin: 0 0 14px;
+      font-size: clamp(24px, 3vw, 36px);
+      letter-spacing: 0.08em;
+    }
+
+    .story-copy p {
+      margin: 0;
+      color: #7a6250;
+      font-family: "Noto Sans TC", sans-serif;
+      line-height: 1.95;
+    }
+
+    .story-values {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .story-values span {
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      color: var(--muted);
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 13px;
+      text-align: center;
     }
 
     .filters {
@@ -511,8 +720,16 @@
     }
 
     @media (max-width: 900px) {
-      .products, .planning-grid {
+      .category-grid, .products, .popular-grid, .planning-grid, .story-panel {
         grid-template-columns: 1fr;
+      }
+
+      .story-values {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .story-flower {
+        display: none;
       }
     }
 
@@ -588,55 +805,45 @@
   </header>
 
   <section class="hero" id="top" aria-label="Emily 手作工坊主視覺">
-    <img class="hero-image" src="assets/emily-brand-bg.png" alt="Emily 手作工坊主視覺">
+    <img class="hero-image" src="assets/emily-hero-wide.png" alt="Emily 手作工坊主視覺">
   </section>
 
   <main>
-    <section class="section" id="products">
-      <div class="section-head">
+    <section class="section section-centered" id="categories">
+      <div class="section-head section-head-centered">
         <div class="section-title">
-          <h2>手作作品櫃</h2>
-          <p>商品會優先讀取 Google 試算表；表格還沒填資料時，先用示範品項撐起畫面。</p>
+          <h2>商品分類</h2>
+          <p>用心手作，為生活增添溫度</p>
         </div>
         <div class="sheet-status" id="sheetStatus">正在讀取試算表...</div>
       </div>
-      <div class="filters" id="filters" aria-label="商品分類"></div>
-      <div class="products" id="productGrid"></div>
+      <div class="category-grid" id="categoryGrid"></div>
     </section>
 
-    <section class="section" id="plan">
-      <div class="section-head">
+    <section class="section section-centered" id="popular">
+      <div class="section-head section-head-centered">
         <div class="section-title">
-          <h2>初步營運布局</h2>
-          <p>先用最輕量的方式跑通：太太維護表格，網站自動展示，客人把想買的作品整理成詢問清單。</p>
+          <h2>本月人氣作品</h2>
+          <p>大家都喜歡的手作小物</p>
         </div>
       </div>
-      <div class="planning-grid">
-        <article class="panel">
-          <h3>第一階段功能</h3>
-          <ul>
-            <li>試算表作為商品後台：名稱、分類、價格、庫存、狀態、照片和排序都由表格控制。</li>
-            <li>網站前台：主視覺、分類篩選、商品卡片、購物清單與詢問文字複製。</li>
-            <li>販售流程先採「詢問制」：避免一開始就處理金流、物流、退換貨和庫存鎖定。</li>
-            <li>之後可加 LINE 官方帳號、Google Form 訂單、或串接 Apps Script 寫回訂單。</li>
-          </ul>
-        </article>
-        <article class="panel">
-          <h3>建議試算表欄位</h3>
-          <p>第一列請放欄位名稱，第二列開始放商品。</p>
-          <div class="schema">
-            <code>上架</code>
-            <code>分類</code>
-            <code>名稱</code>
-            <code>價格</code>
-            <code>庫存</code>
-            <code>狀態</code>
-            <code>圖片</code>
-            <code>描述</code>
-            <code>規格</code>
-            <code>排序</code>
+      <div class="popular-grid" id="popularGrid"></div>
+    </section>
+
+    <section class="section" id="story">
+      <div class="story-panel">
+        <div class="story-photo" aria-hidden="true"></div>
+        <div class="story-copy">
+          <h2>關於 Emily 手作工坊</h2>
+          <p>每一針、每一線，都是用心慢慢編織而成。希望收到作品的人，能感受到手作的溫度，在忙碌的生活中，擁有片刻的療癒與美好。</p>
+          <div class="story-values">
+            <span>純手工製作</span>
+            <span>嚴選優質材料</span>
+            <span>用心包裝出貨</span>
+            <span>客製化服務</span>
           </div>
-        </article>
+        </div>
+        <div class="story-flower" aria-hidden="true"></div>
       </div>
     </section>
   </main>
@@ -700,6 +907,40 @@
         description: "柔和花色搭配日常穿搭，也適合作為小禮物。",
         spec: "多色可選",
         sort: 30
+      },
+      {
+        id: "sample-flower-coaster",
+        listed: true,
+        category: "編織杯墊",
+        name: "花朵編織杯墊",
+        price: 160,
+        stock: 8,
+        status: "現貨",
+        image: "",
+        description: "粉嫩花朵造型，讓日常茶席多一點療癒感。",
+        spec: "單入",
+        sort: 40
+      }
+    ];
+
+    const categoryCards = [
+      {
+        category: "編織花束",
+        en: "Crochet Bouquet",
+        description: "溫暖送禮首選，傳遞心意的花",
+        crop: "crop-bouquet"
+      },
+      {
+        category: "編織杯墊",
+        en: "Crochet Coaster",
+        description: "實用又療癒，點亮每個角落",
+        crop: "crop-coaster"
+      },
+      {
+        category: "編織髮圈",
+        en: "Crochet Hair Tie",
+        description: "多款造型，為日常增添可愛",
+        crop: "crop-hairtie"
       }
     ];
 
@@ -707,8 +948,8 @@
     let activeCategory = "全部";
     let cart = [];
 
-    const productGrid = document.getElementById("productGrid");
-    const filters = document.getElementById("filters");
+    const categoryGrid = document.getElementById("categoryGrid");
+    const popularGrid = document.getElementById("popularGrid");
     const sheetStatus = document.getElementById("sheetStatus");
     const cartDrawer = document.getElementById("cartDrawer");
     const cartList = document.getElementById("cartList");
@@ -819,8 +1060,62 @@
         products = sampleProducts;
         sheetStatus.textContent = "暫時讀不到試算表，先顯示示範品項";
       }
-      renderFilters();
-      renderProducts();
+      renderCategories();
+      renderPopularProducts();
+    }
+
+    function renderCategories() {
+      categoryGrid.innerHTML = categoryCards.map(card => `
+        <article class="category-card">
+          <div class="category-image ${card.crop}" aria-hidden="true"></div>
+          <h3>${escapeHtml(card.category)}</h3>
+          <div class="category-en">${escapeHtml(card.en)}</div>
+          <p>${escapeHtml(card.description)}</p>
+          <a class="category-link" href="#popular">查看作品 →</a>
+        </article>
+      `).join("");
+    }
+
+    function visualCropForCategory(category, index = 0) {
+      if (String(category).includes("花束")) return "crop-bouquet";
+      if (String(category).includes("杯墊")) return index % 2 ? "crop-story" : "crop-coaster";
+      if (String(category).includes("髮圈")) return "crop-hairtie";
+      return ["crop-bouquet", "crop-coaster", "crop-hairtie", "crop-story"][index % 4];
+    }
+
+    function renderPopularProducts() {
+      const visible = products.slice(0, 4);
+      if (!visible.length) {
+        popularGrid.innerHTML = '<div class="empty">目前還沒有可顯示的人氣作品。</div>';
+        return;
+      }
+
+      popularGrid.innerHTML = visible.map((item, index) => {
+        const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
+        const crop = visualCropForCategory(item.category, index);
+        const imageHtml = item.image
+          ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.parentElement.classList.add('${crop}');this.remove()">`
+          : "";
+        return `
+          <article class="popular-card">
+            <div class="popular-rank">NO.${index + 1}</div>
+            <div class="popular-image ${item.image ? "" : crop}">
+              ${imageHtml}
+            </div>
+            <div class="popular-body">
+              <h3>${escapeHtml(item.name)}</h3>
+              <div class="popular-foot">
+                <div class="price">${formatPrice(item.price)}</div>
+                <button class="heart-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(item.name)} 到購物清單">♡</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      popularGrid.querySelectorAll(".heart-button:not([disabled])").forEach(button => {
+        button.addEventListener("click", () => addToCart(button.dataset.id));
+      });
     }
 
     function renderFilters() {
