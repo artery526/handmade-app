@@ -1076,7 +1076,7 @@
       categoryGrid.innerHTML = categoryCards.map(card => `
         <article class="category-card">
           ${card.video
-            ? `<video class="category-video" src="${escapeAttr(card.video)}" autoplay muted loop playsinline preload="metadata" aria-label="${escapeAttr(card.category)}動態展示"></video>`
+            ? `<video class="category-video" src="${escapeAttr(card.video)}" autoplay muted playsinline preload="metadata" aria-label="${escapeAttr(card.category)}動態展示"></video>`
             : `<div class="category-image ${card.crop}" aria-hidden="true"></div>`}
           <h3>${escapeHtml(card.category)}</h3>
           <div class="category-en">${escapeHtml(card.en)}</div>
@@ -1084,6 +1084,25 @@
           <a class="category-link" href="#popular">查看作品 →</a>
         </article>
       `).join("");
+      setupCategoryVideos();
+    }
+
+    function setupCategoryVideos() {
+      categoryGrid.querySelectorAll(".category-video").forEach(video => {
+        const startLoop = () => {
+          video.loop = true;
+          if (video.ended || video.paused) video.currentTime = 0;
+          video.play().catch(() => {});
+        };
+        video.addEventListener("ended", () => {
+          video.loop = false;
+          video.pause();
+        });
+        video.addEventListener("pointerenter", startLoop);
+        video.addEventListener("mousemove", startLoop, { once: true });
+        video.addEventListener("click", startLoop);
+        video.addEventListener("touchstart", startLoop, { passive: true });
+      });
     }
 
     function visualCropForCategory(category, index = 0) {
