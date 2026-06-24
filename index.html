@@ -417,6 +417,7 @@
 
     .filters {
       display: flex;
+      justify-content: center;
       gap: 10px;
       overflow-x: auto;
       padding-bottom: 12px;
@@ -438,6 +439,14 @@
       background: var(--sage);
       border-color: transparent;
       color: #fff;
+    }
+
+    .shop-note {
+      margin: -10px 0 22px;
+      color: var(--muted);
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 14px;
+      text-align: center;
     }
 
     .products {
@@ -827,6 +836,18 @@
       <div class="category-grid" id="categoryGrid"></div>
     </section>
 
+    <section class="section" id="shop">
+      <div class="section-head section-head-centered">
+        <div class="section-title">
+          <h2 id="shopTitle">商品列表</h2>
+          <p id="shopSubtitle">選擇分類查看目前可詢問的作品</p>
+        </div>
+      </div>
+      <div class="filters" id="productTabs" aria-label="商品分頁"></div>
+      <div class="shop-note" id="shopNote"></div>
+      <div class="products" id="productGrid"></div>
+    </section>
+
     <section class="section section-centered" id="popular">
       <div class="section-head section-head-centered">
         <div class="section-title">
@@ -936,21 +957,24 @@
         en: "Crochet Bouquet",
         description: "溫暖送禮首選，傳遞心意的花",
         crop: "crop-bouquet",
-        video: "flower.mp4"
+        video: "flower.mp4",
+        targetCategory: "花束"
       },
       {
         category: "編織杯墊",
         en: "Crochet Coaster",
         description: "實用又療癒，點亮每個角落",
         crop: "crop-coaster",
-        video: "cup.mp4"
+        video: "cup.mp4",
+        targetCategory: "杯墊"
       },
       {
         category: "編織髮圈",
         en: "Crochet Hair Tie",
         description: "多款造型，為日常增添可愛",
         crop: "crop-hairtie",
-        video: "hair.mp4"
+        video: "hair.mp4",
+        targetCategory: "髮圈"
       }
     ];
 
@@ -960,6 +984,11 @@
 
     const categoryGrid = document.getElementById("categoryGrid");
     const popularGrid = document.getElementById("popularGrid");
+    const productTabs = document.getElementById("productTabs");
+    const productGrid = document.getElementById("productGrid");
+    const shopTitle = document.getElementById("shopTitle");
+    const shopSubtitle = document.getElementById("shopSubtitle");
+    const shopNote = document.getElementById("shopNote");
     const sheetStatus = document.getElementById("sheetStatus");
     const cartDrawer = document.getElementById("cartDrawer");
     const cartList = document.getElementById("cartList");
@@ -1044,9 +1073,9 @@
     function normalizeImageUrl(url) {
       const raw = String(url || "").trim();
       const driveMatch = raw.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-      if (driveMatch) return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+      if (driveMatch) return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000`;
       const openMatch = raw.match(/[?&]id=([^&]+)/);
-      if (raw.includes("drive.google.com") && openMatch) return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
+      if (raw.includes("drive.google.com") && openMatch) return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w1000`;
       return raw;
     }
 
@@ -1071,6 +1100,7 @@
         sheetStatus.textContent = "暫時讀不到試算表，先顯示示範品項";
       }
       renderCategories();
+      renderProductTabs(preferredProductCategory());
       renderPopularProducts();
     }
 
@@ -1083,10 +1113,16 @@
           <h3>${escapeHtml(card.category)}</h3>
           <div class="category-en">${escapeHtml(card.en)}</div>
           <p>${escapeHtml(card.description)}</p>
-          <a class="category-link" href="#popular">查看作品 →</a>
+          <a class="category-link" href="#shop" data-category="${escapeAttr(card.targetCategory)}">查看作品 →</a>
         </article>
       `).join("");
       setupCategoryVideos();
+      categoryGrid.querySelectorAll(".category-link").forEach(link => {
+        link.addEventListener("click", event => {
+          event.preventDefault();
+          setActiveProductCategory(link.dataset.category || "全部", { scroll: true });
+        });
+      });
     }
 
     function setupCategoryVideos() {
@@ -1149,24 +1185,51 @@
       });
     }
 
-    function renderFilters() {
-      const categories = ["全部", ...new Set(products.map(item => item.category).filter(Boolean))];
-      filters.innerHTML = categories.map(category => `
-        <button class="filter ${category === activeCategory ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>
+    function preferredProductCategory() {
+      const categories = products.map(item => item.category).filter(Boolean);
+      return categories.find(category => categoryMatches(category, "杯墊")) || categories[0] || "全部";
+    }
+
+    function uniqueProductCategories() {
+      const fromCards = categoryCards.map(card => card.targetCategory).filter(Boolean);
+      const fromProducts = products.map(item => item.category).filter(Boolean);
+      return ["全部", ...new Set([...fromCards, ...fromProducts])];
+    }
+
+    function categoryMatches(productCategory, selectedCategory) {
+      if (selectedCategory === "全部") return true;
+      const productText = String(productCategory || "").trim();
+      const selectedText = String(selectedCategory || "").trim();
+      return productText === selectedText || productText.includes(selectedText) || selectedText.includes(productText);
+    }
+
+    function renderProductTabs(nextCategory = activeCategory) {
+      const categories = uniqueProductCategories();
+      activeCategory = categories.includes(nextCategory) ? nextCategory : preferredProductCategory();
+      productTabs.innerHTML = categories.map(category => `
+        <button class="filter ${category === activeCategory ? "active" : ""}" type="button" data-category="${escapeAttr(category)}">${escapeHtml(category)}</button>
       `).join("");
-      filters.querySelectorAll(".filter").forEach(button => {
+      productTabs.querySelectorAll(".filter").forEach(button => {
         button.addEventListener("click", () => {
-          activeCategory = button.dataset.category;
-          renderFilters();
-          renderProducts();
+          setActiveProductCategory(button.dataset.category || "全部");
         });
       });
+      renderProducts();
+    }
+
+    function setActiveProductCategory(category, options = {}) {
+      renderProductTabs(category);
+      if (options.scroll) document.getElementById("shop").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function renderProducts() {
       const visible = activeCategory === "全部"
         ? products
-        : products.filter(item => item.category === activeCategory);
+        : products.filter(item => categoryMatches(item.category, activeCategory));
+
+      shopTitle.textContent = activeCategory === "全部" ? "全部商品" : `${activeCategory}商品`;
+      shopSubtitle.textContent = activeCategory === "杯墊" ? "目前上架的杯墊作品" : "選擇分類查看目前可詢問的作品";
+      shopNote.textContent = activeCategory === "杯墊" ? "由庫存試算表同步顯示，新增或下架都可以從表格管理。" : "";
 
       if (!visible.length) {
         productGrid.innerHTML = '<div class="empty">這個分類目前還沒有作品。</div>';
