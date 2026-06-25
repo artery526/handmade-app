@@ -235,6 +235,12 @@
       white-space: nowrap;
     }
 
+    .sheet-status:empty,
+    #shopSubtitle:empty,
+    #shopNote:empty {
+      display: none;
+    }
+
     .category-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -249,7 +255,7 @@
       padding: 14px;
     }
 
-    .category-image, .popular-image, .story-photo, .story-flower {
+    .category-image, .popular-image {
       background-image: url("assets/emily-hero-wide.png");
       background-size: 250% auto;
       background-repeat: no-repeat;
@@ -393,7 +399,7 @@
 
     .story-panel {
       display: grid;
-      grid-template-columns: 1fr 1.25fr 0.8fr;
+      grid-template-columns: 1.05fr 1fr;
       gap: 26px;
       align-items: center;
       border: 1px solid var(--line);
@@ -403,16 +409,13 @@
       padding: 18px;
     }
 
-    .story-photo, .story-flower {
-      min-height: 210px;
+    .story-image {
+      display: block;
+      width: 100%;
+      aspect-ratio: 2 / 1;
+      object-fit: cover;
       border-radius: 8px;
       border: 1px solid rgba(166, 126, 94, 0.16);
-    }
-
-    .story-copy h2 {
-      margin: 0 0 14px;
-      font-size: clamp(24px, 3vw, 36px);
-      letter-spacing: 0.08em;
     }
 
     .story-copy p {
@@ -774,10 +777,6 @@
       .story-values {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-
-      .story-flower {
-        display: none;
-      }
     }
 
     @media (max-width: 640px) {
@@ -871,7 +870,7 @@
           <h2>商品分類</h2>
           <p>用心手作，為生活增添溫度</p>
         </div>
-        <div class="sheet-status" id="sheetStatus">正在讀取試算表...</div>
+        <div class="sheet-status" id="sheetStatus"></div>
       </div>
       <div class="category-grid" id="categoryGrid"></div>
     </section>
@@ -880,7 +879,7 @@
       <div class="section-head section-head-centered">
         <div class="section-title">
           <h2 id="shopTitle">商品列表</h2>
-          <p id="shopSubtitle">選擇分類查看目前可詢問的作品</p>
+          <p id="shopSubtitle"></p>
         </div>
       </div>
       <div class="filters" id="productTabs" aria-label="商品分頁"></div>
@@ -892,7 +891,7 @@
       <div class="section-head section-head-centered">
         <div class="section-title">
           <h2>本月人氣作品</h2>
-          <p>大家都喜歡的手作小物</p>
+          <p>🧶 一針一線的人氣手作</p>
         </div>
       </div>
       <div class="popular-grid" id="popularGrid"></div>
@@ -900,9 +899,7 @@
 
     <section class="section" id="story">
       <div class="story-panel">
-        <div class="story-photo" aria-hidden="true"></div>
         <div class="story-copy">
-          <h2>關於 Emily 手作工坊</h2>
           <p>每一針、每一線，都是用心慢慢編織而成。希望收到作品的人，能感受到手作的溫度，在忙碌的生活中，擁有片刻的療癒與美好。</p>
           <div class="story-values">
             <span>純手工製作</span>
@@ -911,7 +908,7 @@
             <span>客製化服務</span>
           </div>
         </div>
-        <div class="story-flower" aria-hidden="true"></div>
+        <img class="story-image" src="Downsize.png" alt="Emily 手作工坊作品展示" loading="lazy">
       </div>
     </section>
   </main>
@@ -1141,14 +1138,14 @@
         const sheetProducts = rowsToProducts(parseCsv(text));
         if (sheetProducts.length) {
           products = sheetProducts.sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name, "zh-Hant"));
-          sheetStatus.textContent = `已讀取 ${products.length} 件試算表作品`;
+          sheetStatus.textContent = "";
         } else {
           products = sampleProducts;
-          sheetStatus.textContent = "試算表目前沒有商品資料，先顯示示範品項";
+          sheetStatus.textContent = "";
         }
       } catch (error) {
         products = sampleProducts;
-        sheetStatus.textContent = "暫時讀不到試算表，先顯示示範品項";
+        sheetStatus.textContent = "";
       }
       renderCategories();
       renderProductTabs(preferredProductCategory());
@@ -1278,7 +1275,7 @@
         : products.filter(item => categoryMatches(item.category, activeCategory));
 
       shopTitle.textContent = activeCategory === "全部" ? "全部商品" : `${activeCategory}商品`;
-      shopSubtitle.textContent = activeCategory === "全部" ? "目前上架的所有作品" : "";
+      shopSubtitle.textContent = "";
       shopNote.textContent = "";
 
       if (!visible.length) {
