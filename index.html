@@ -334,6 +334,22 @@
       text-align: left;
     }
 
+    .stock-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 3;
+      border-radius: 999px;
+      background: #c94b43;
+      color: #fff;
+      padding: 6px 12px;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      box-shadow: 0 8px 18px rgba(201, 75, 67, 0.28);
+    }
+
     .popular-rank {
       position: absolute;
       top: 12px;
@@ -482,6 +498,7 @@
     }
 
     .product-card {
+      position: relative;
       overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -1207,6 +1224,7 @@
 
       popularGrid.innerHTML = visible.map((item, index) => {
         const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
+        const showOutOfStockBadge = item.popular && Number(item.stock) <= 0;
         const crop = visualCropForCategory(item.category, index);
         const imageHtml = item.image
           ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.parentElement.classList.add('${crop}');this.remove()">`
@@ -1214,6 +1232,7 @@
         return `
           <article class="popular-card">
             <div class="popular-rank">NO.${index + 1}</div>
+            ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
             <div class="popular-image ${item.image ? "" : crop}">
               ${imageHtml}
             </div>
@@ -1285,9 +1304,11 @@
 
       productGrid.innerHTML = visible.map(item => {
         const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
+        const showOutOfStockBadge = item.popular && Number(item.stock) <= 0;
         const specLabel = formatSpecLabel(item.spec);
         return `
           <article class="product-card">
+            ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
             <div class="product-image">
               ${item.image
                 ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-placeholder" style="display:none">${escapeHtml(item.category)}</div>`
