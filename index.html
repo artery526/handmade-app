@@ -983,7 +983,7 @@
       {
         id: "sample-hairtie",
         listed: true,
-        category: "編織髮圈",
+        category: "手作其它",
         name: "春日花圈髮束",
         price: 260,
         stock: 5,
@@ -1020,20 +1020,20 @@
         targetCategory: "花束"
       },
       {
-        category: "編織杯墊",
-        en: "Crochet Coaster",
-        description: "實用又療癒，點亮每個角落",
+        category: "編織杯墊&髮圈",
+        en: "Crochet Coaster & Hair Tie",
+        description: "實用又療癒，點亮日常小角落",
         crop: "crop-coaster",
-        video: "cup.mp4",
-        targetCategory: "杯墊"
+        video: "cuphair.mp4",
+        targetCategory: "杯墊&髮圈"
       },
       {
-        category: "編織髮圈",
-        en: "Crochet Hair Tie",
-        description: "多款造型，為日常增添可愛",
+        category: "其它手作小物",
+        en: "Handmade Goods",
+        description: "生活裡的小巧心意與溫柔陪伴",
         crop: "crop-hairtie",
         video: "hair.mp4",
-        targetCategory: "髮圈"
+        targetCategory: "手作其它"
       }
     ];
 
@@ -1267,7 +1267,11 @@
       if (selectedCategory === "全部") return true;
       const productText = String(productCategory || "").trim();
       const selectedText = String(selectedCategory || "").trim();
-      return productText === selectedText || productText.includes(selectedText) || selectedText.includes(productText);
+      const selectedParts = selectedText.split(/[&／/、，,]+/).map(part => part.trim()).filter(Boolean);
+      return productText === selectedText
+        || productText.includes(selectedText)
+        || selectedText.includes(productText)
+        || selectedParts.some(part => productText.includes(part) || part.includes(productText));
     }
 
     function renderProductTabs(nextCategory = activeCategory) {
