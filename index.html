@@ -1694,10 +1694,10 @@
         return;
       }
 
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("items", JSON.stringify(buildOrderItemsPayload()));
-      formData.append("website", websiteField.value.trim());
+      const formData = new URLSearchParams();
+      formData.set("email", email);
+      formData.set("items", JSON.stringify(buildOrderItemsPayload()));
+      formData.set("website", websiteField.value.trim());
 
       submitOrder.disabled = true;
       submitOrder.textContent = "送出中...";
