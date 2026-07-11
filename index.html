@@ -221,6 +221,10 @@
       letter-spacing: 0.12em;
     }
 
+    .section-title h2:empty {
+      display: none;
+    }
+
     .section-title p {
       margin: 0;
       color: var(--muted);
@@ -429,6 +433,29 @@
       margin: 0 0 6px;
       font-size: 17px;
       line-height: 1.4;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .product-code {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid rgba(198, 119, 86, 0.34);
+      border-radius: 999px;
+      background: rgba(255, 247, 238, 0.95);
+      color: #9d5c3d;
+      padding: 2px 9px;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .popular-spec {
@@ -1028,6 +1055,7 @@
         image: "",
         description: "適合生日、紀念日和溫柔告白的永生感編織花束。",
         spec: "可客製主色",
+        code: "B001",
         popular: true,
         sort: 10
       },
@@ -1042,6 +1070,7 @@
         image: "",
         description: "花朵造型杯墊，適合咖啡杯、香氛杯和辦公桌小角落。",
         spec: "一組 2 入",
+        code: "C001",
         popular: true,
         sort: 20
       },
@@ -1056,6 +1085,7 @@
         image: "",
         description: "柔和花色搭配日常穿搭，也適合作為小禮物。",
         spec: "多色可選",
+        code: "H001",
         popular: true,
         sort: 30
       },
@@ -1070,6 +1100,7 @@
         image: "",
         description: "粉嫩花朵造型，讓日常茶席多一點療癒感。",
         spec: "單入",
+        code: "C002",
         popular: false,
         sort: 40
       }
@@ -1180,8 +1211,10 @@
         const priceText = pick(row, ["價格", "售價", "price"]).replace(/[^\d.]/g, "");
         const stockText = pick(row, ["庫存", "數量", "stock"]).replace(/[^\d-]/g, "");
         const popularText = pick(row, ["熱門作品", "人氣作品", "popular", "featured"]).trim().toLowerCase();
+        const code = pick(row, ["編號", "商品編號", "code", "sku"]);
         return {
-          id: pick(row, ["編號", "id", "sku"]) || `sheet-${index}`,
+          id: code || pick(row, ["id", "sku"]) || `sheet-${index}`,
+          code,
           listed,
           category: pick(row, ["分類", "類別", "category"]) || "未分類",
           name: pick(row, ["名稱", "商品名稱", "作品名稱", "name"]) || "未命名作品",
@@ -1293,6 +1326,7 @@
         const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
         const showOutOfStockBadge = item.popular && Number(item.stock) <= 0;
         const specLabel = formatSpecLabel(item.spec);
+        const codeLabel = String(item.code || "").trim();
         const crop = visualCropForCategory(item.category, index);
         const imageHtml = item.image
           ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.parentElement.classList.add('${crop}');this.remove()">`
@@ -1305,7 +1339,10 @@
               ${imageHtml}
             </div>
             <div class="popular-body">
-              <h3>${escapeHtml(item.name)}</h3>
+              <div class="title-row">
+                <h3>${escapeHtml(item.name)}</h3>
+                ${codeLabel ? `<span class="product-code">${escapeHtml(codeLabel)}</span>` : ""}
+              </div>
               ${specLabel ? `<p class="popular-spec">${escapeHtml(specLabel)}</p>` : ""}
               <div class="popular-foot">
                 <div class="price">${formatPrice(item.price)}</div>
@@ -1373,7 +1410,7 @@
         ? products
         : products.filter(item => categoryMatches(item.category, activeCategory));
 
-      shopTitle.textContent = activeCategory === "全部" ? "全部商品" : `${activeCategory}商品`;
+      shopTitle.textContent = activeCategory === "全部" ? "" : `${activeCategory}商品`;
       shopSubtitle.textContent = "";
       shopNote.textContent = "";
       dimensionNotice.hidden = activeCategory !== "全部";
@@ -1387,6 +1424,7 @@
         const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
         const showOutOfStockBadge = item.popular && Number(item.stock) <= 0;
         const specLabel = formatSpecLabel(item.spec);
+        const codeLabel = String(item.code || "").trim();
         const categoryLabel = activeCategory.includes("花束") && String(item.category).includes("杯墊") ? "" : item.category;
         const placeholderLabel = categoryLabel || item.name;
         return `
@@ -1402,7 +1440,10 @@
                 ${categoryLabel ? `<span>${escapeHtml(categoryLabel)}</span>` : ""}
                 ${specLabel ? `<span>${escapeHtml(specLabel)}</span>` : ""}
               </div>
-              <h3 class="product-title">${escapeHtml(item.name)}</h3>
+              <div class="title-row">
+                <h3 class="product-title">${escapeHtml(item.name)}</h3>
+                ${codeLabel ? `<span class="product-code">${escapeHtml(codeLabel)}</span>` : ""}
+              </div>
               <p class="product-desc">${escapeHtml(item.description || item.spec || "手作作品資訊整理中，歡迎先加入詢問清單。")}</p>
               <div class="product-foot">
                 <div class="price">${formatPrice(item.price)}</div>
