@@ -393,6 +393,15 @@
       line-height: 1.4;
     }
 
+    .popular-spec {
+      min-height: 20px;
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
     .popular-foot {
       display: flex;
       align-items: center;
@@ -1226,6 +1235,7 @@
       popularGrid.innerHTML = visible.map((item, index) => {
         const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
         const showOutOfStockBadge = item.popular && Number(item.stock) <= 0;
+        const specLabel = formatSpecLabel(item.spec);
         const crop = visualCropForCategory(item.category, index);
         const imageHtml = item.image
           ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.parentElement.classList.add('${crop}');this.remove()">`
@@ -1239,6 +1249,7 @@
             </div>
             <div class="popular-body">
               <h3>${escapeHtml(item.name)}</h3>
+              ${specLabel ? `<p class="popular-spec">${escapeHtml(specLabel)}</p>` : ""}
               <div class="popular-foot">
                 <div class="price">${formatPrice(item.price)}</div>
                 <button class="heart-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(item.name)} 到購物清單">♡</button>
@@ -1311,17 +1322,19 @@
         const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
         const showOutOfStockBadge = item.popular && Number(item.stock) <= 0;
         const specLabel = formatSpecLabel(item.spec);
+        const categoryLabel = activeCategory.includes("花束") && String(item.category).includes("杯墊") ? "" : item.category;
+        const placeholderLabel = categoryLabel || item.name;
         return `
           <article class="product-card">
             ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
             <div class="product-image">
               ${item.image
-                ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-placeholder" style="display:none">${escapeHtml(item.category)}</div>`
-                : `<div class="product-placeholder">${escapeHtml(item.category)}</div>`}
+                ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-placeholder" style="display:none">${escapeHtml(placeholderLabel)}</div>`
+                : `<div class="product-placeholder">${escapeHtml(placeholderLabel)}</div>`}
             </div>
             <div class="product-body">
               <div class="product-meta">
-                <span>${escapeHtml(item.category)}</span>
+                ${categoryLabel ? `<span>${escapeHtml(categoryLabel)}</span>` : ""}
                 ${specLabel ? `<span>${escapeHtml(specLabel)}</span>` : ""}
               </div>
               <h3 class="product-title">${escapeHtml(item.name)}</h3>
