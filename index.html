@@ -896,8 +896,7 @@
       pointer-events: none;
     }
 
-    .submit-order,
-    .copy-order {
+    .submit-order {
       width: 100%;
       min-height: 48px;
       border: 0;
@@ -914,13 +913,6 @@
     .submit-order:disabled {
       cursor: not-allowed;
       opacity: 0.58;
-    }
-
-    .copy-order {
-      margin-top: 8px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.82);
-      color: var(--ink);
     }
 
     .toast {
@@ -1144,7 +1136,6 @@
         </label>
         <button class="submit-order" type="submit" id="submitOrder">送出詢問單</button>
       </form>
-      <button class="copy-order" type="button" id="copyOrder">複製詢問內容</button>
     </div>
   </aside>
   <div class="toast" id="toast"></div>
@@ -1623,27 +1614,6 @@
       });
     }
 
-    function buildOrderText() {
-      if (!cart.length) return "您好，我想詢問 Emily 手作工坊的作品。";
-      const lines = cart.map((item, index) => `${index + 1}. ${item.name} x ${item.qty} - ${formatPrice(item.price * item.qty)}`);
-      return [
-        "您好，我想詢問 Emily 手作工坊的作品：",
-        ...lines,
-        `預估小計：${cartTotal.textContent}`,
-        "想請問是否還能訂購，以及取貨/寄送方式，謝謝。"
-      ].join("\n");
-    }
-
-    async function copyOrder() {
-      const text = buildOrderText();
-      try {
-        await navigator.clipboard.writeText(text);
-        showToast("詢問內容已複製");
-      } catch (error) {
-        window.prompt("複製詢問內容", text);
-      }
-    }
-
     function createCaptcha() {
       const left = Math.floor(Math.random() * 8) + 2;
       const right = Math.floor(Math.random() * 8) + 1;
@@ -1755,7 +1725,6 @@
       cartDrawer.setAttribute("aria-hidden", "true");
     });
 
-    document.getElementById("copyOrder").addEventListener("click", copyOrder);
     document.getElementById("refreshCaptcha").addEventListener("click", createCaptcha);
     orderForm.addEventListener("submit", submitOrderForm);
     createCaptcha();
