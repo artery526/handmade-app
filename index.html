@@ -228,6 +228,44 @@
       line-height: 1.8;
     }
 
+    #shop .section-head-centered {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      text-align: left;
+    }
+
+    .dimension-notice {
+      max-width: 560px;
+      border: 2px solid rgba(198, 119, 86, 0.42);
+      border-radius: 8px;
+      background: rgba(255, 247, 238, 0.88);
+      box-shadow: 0 12px 30px rgba(109, 77, 53, 0.1);
+      padding: 14px 16px;
+      color: #6d4d35;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.75;
+    }
+
+    .dimension-notice strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #9d5c3d;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .dimension-notice p {
+      margin: 0;
+    }
+
+    .dimension-notice p + p {
+      margin-top: 6px;
+    }
+
     .sheet-status {
       color: var(--muted);
       font-family: "Noto Sans TC", sans-serif;
@@ -851,6 +889,19 @@
         display: block;
       }
 
+      #shop .section-head-centered {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .dimension-notice {
+        width: 100%;
+        margin-top: 8px;
+        text-align: left;
+      }
+
       .sheet-status {
         margin-top: 10px;
         white-space: normal;
@@ -907,6 +958,11 @@
         <div class="section-title">
           <h2 id="shopTitle">商品列表</h2>
           <p id="shopSubtitle"></p>
+        </div>
+        <div class="dimension-notice" id="dimensionNotice">
+          <strong>📏 商品尺寸說明</strong>
+          <p>商品尺寸皆為手工測量，頁面所標示之尺寸為約略公分數，可能因手工製作及測量方式不同而有些微誤差（約 ±1～2 公分）。</p>
+          <p>若您需要更精確的長、寬、高尺寸，歡迎於下單前私訊詢問，我們很樂意為您實際測量並提供詳細尺寸資訊，協助您挑選最適合的商品。</p>
         </div>
       </div>
       <div class="filters" id="productTabs" aria-label="商品分頁"></div>
@@ -1057,6 +1113,7 @@
     const shopTitle = document.getElementById("shopTitle");
     const shopSubtitle = document.getElementById("shopSubtitle");
     const shopNote = document.getElementById("shopNote");
+    const dimensionNotice = document.getElementById("dimensionNotice");
     const sheetStatus = document.getElementById("sheetStatus");
     const cartDrawer = document.getElementById("cartDrawer");
     const cartList = document.getElementById("cartList");
@@ -1319,6 +1376,7 @@
       shopTitle.textContent = activeCategory === "全部" ? "全部商品" : `${activeCategory}商品`;
       shopSubtitle.textContent = "";
       shopNote.textContent = "";
+      dimensionNotice.hidden = activeCategory !== "全部";
 
       if (!visible.length) {
         productGrid.innerHTML = '<div class="empty">這個分類目前還沒有作品。</div>';
