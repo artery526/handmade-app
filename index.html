@@ -1268,9 +1268,16 @@
       return "全部";
     }
 
+    function isCoveredByCombinedCategory(category) {
+      const text = String(category || "").trim();
+      return text.includes("杯墊") || text.includes("髮圈");
+    }
+
     function uniqueProductCategories() {
       const fromCards = categoryCards.map(card => card.targetCategory).filter(Boolean);
-      const fromProducts = products.map(item => item.category).filter(Boolean);
+      const fromProducts = products
+        .map(item => item.category)
+        .filter(category => category && !isCoveredByCombinedCategory(category));
       return ["全部", ...new Set([...fromCards, ...fromProducts])];
     }
 
