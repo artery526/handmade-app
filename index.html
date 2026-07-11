@@ -789,6 +789,10 @@
       font-size: 16px;
     }
 
+    .cart-item .title-row {
+      align-items: center;
+    }
+
     .cart-item span {
       color: var(--muted);
       font-family: "Noto Sans TC", sans-serif;
@@ -1483,13 +1487,19 @@
         return;
       }
 
-      cartList.innerHTML = cart.map(item => `
+      cartList.innerHTML = cart.map(item => {
+        const codeLabel = String(item.code || "").trim();
+        return `
         <div class="cart-item">
-          <strong>${escapeHtml(item.name)}</strong>
+          <div class="title-row">
+            <strong>${escapeHtml(item.name)}</strong>
+            ${codeLabel ? `<span class="product-code">${escapeHtml(codeLabel)}</span>` : ""}
+          </div>
           <button class="remove-button" type="button" data-id="${escapeAttr(item.id)}">移除</button>
           <span>${escapeHtml(item.category)} / ${formatPrice(item.price)} × ${item.qty}</span>
         </div>
-      `).join("");
+      `;
+      }).join("");
 
       cartList.querySelectorAll(".remove-button").forEach(button => {
         button.addEventListener("click", () => {
