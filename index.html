@@ -474,17 +474,22 @@
       gap: 10px;
     }
 
-    .heart-button {
+    .popular-cart-button {
+      min-height: 36px;
       border: 0;
-      background: transparent;
-      color: var(--rose);
-      font-size: 22px;
+      border-radius: 999px;
+      padding: 0 14px;
+      background: var(--ink);
+      color: #fff;
       cursor: pointer;
-      line-height: 1;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
-    .heart-button[disabled] {
-      color: #d8c7b8;
+    .popular-cart-button[disabled] {
+      background: #d8c7b8;
       cursor: not-allowed;
     }
 
@@ -1455,14 +1460,14 @@
               ${specLabel ? `<p class="popular-spec">${escapeHtml(specLabel)}</p>` : ""}
               <div class="popular-foot">
                 <div class="price">${formatPrice(item.price)}</div>
-                <button class="heart-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(item.name)} 到購物清單">♡</button>
+                <button class="popular-cart-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(item.name)} 到購物車">${soldOut ? "已售完" : "+購物車"}</button>
               </div>
             </div>
           </article>
         `;
       }).join("");
 
-      popularGrid.querySelectorAll(".heart-button:not([disabled])").forEach(button => {
+      popularGrid.querySelectorAll(".popular-cart-button:not([disabled])").forEach(button => {
         button.addEventListener("click", () => addToCart(button.dataset.id));
       });
     }
@@ -1553,10 +1558,10 @@
                 <h3 class="product-title">${escapeHtml(item.name)}</h3>
                 ${codeLabel ? `<span class="product-code">${escapeHtml(codeLabel)}</span>` : ""}
               </div>
-              <p class="product-desc">${escapeHtml(item.description || item.spec || "手作作品資訊整理中，歡迎先加入詢問清單。")}</p>
+              <p class="product-desc">${escapeHtml(item.description || item.spec || "手作作品資訊整理中，歡迎先加入購物車。")}</p>
               <div class="product-foot">
                 <div class="price">${formatPrice(item.price)}</div>
-                <button class="add-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""}>${soldOut ? "已售完" : "加入詢問"}</button>
+                <button class="add-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""}>${soldOut ? "已售完" : "+購物車"}</button>
               </div>
             </div>
           </article>
@@ -1578,7 +1583,7 @@
         cart.push({ ...item, qty: 1 });
       }
       renderCart();
-      showToast("已加入詢問清單");
+      showToast("已加入購物車");
     }
 
     function renderCart() {
@@ -1588,7 +1593,7 @@
       cartTotal.textContent = formatPrice(total);
 
       if (!cart.length) {
-        cartList.innerHTML = '<div class="empty">先把喜歡的作品加入詢問清單。</div>';
+        cartList.innerHTML = '<div class="empty">先把喜歡的作品加入購物車。</div>';
         return;
       }
 
