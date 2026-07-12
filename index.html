@@ -537,6 +537,21 @@
       text-align: center;
     }
 
+    .order-watermark {
+      margin-top: 12px;
+      color: #8f7764;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      opacity: 0.34;
+      text-align: left;
+    }
+
+    .order-watermark:empty {
+      display: none;
+    }
+
     .filters {
       display: flex;
       justify-content: center;
@@ -1105,6 +1120,7 @@
             <span>用心包裝出貨</span>
             <span>客製化服務</span>
           </div>
+          <div class="order-watermark" id="orderWatermark" aria-live="polite"></div>
         </div>
         <img class="story-image" src="Downsize.png" alt="Emily 手作工坊作品展示" loading="lazy">
       </div>
@@ -1264,6 +1280,7 @@
     const captchaAnswer = document.getElementById("captchaAnswer");
     const websiteField = document.getElementById("websiteField");
     const submitOrder = document.getElementById("submitOrder");
+    const orderWatermark = document.getElementById("orderWatermark");
     const toast = document.getElementById("toast");
 
     function normalizeHeader(value) {
@@ -1381,6 +1398,17 @@
       renderCategories();
       renderProductTabs(preferredProductCategory());
       renderPopularProducts();
+    }
+
+    async function loadOrderWatermark() {
+      try {
+        const response = await fetch(`${ORDER_WEBAPP_URL}?t=${Date.now()}`, { cache: "no-store" });
+        const data = await response.json();
+        const count = Number(data.pendingOrderCount ?? data.orderCount);
+        orderWatermark.textContent = Number.isFinite(count) ? `未處理訂單： ${count}` : "";
+      } catch (error) {
+        orderWatermark.textContent = "";
+      }
     }
 
     function renderCategories() {
@@ -1734,6 +1762,7 @@
     orderForm.addEventListener("submit", submitOrderForm);
     createCaptcha();
     renderCart();
+    loadOrderWatermark();
     loadProducts();
   </script>
 </body>

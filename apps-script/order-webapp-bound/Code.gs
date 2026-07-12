@@ -8,9 +8,12 @@ const ORDER_HEADERS = [
 const MAX_ORDER_QUANTITY = 20;
 
 function doGet() {
+  const pendingOrderCount = getPendingOrderCount_();
   return jsonResponse_({
     ok: true,
-    service: 'emily-order-webapp'
+    service: 'emily-order-webapp',
+    orderCount: pendingOrderCount,
+    pendingOrderCount
   });
 }
 
@@ -140,6 +143,12 @@ function ensureOrderHeaders_(sheet) {
 
   sheet.getRange(1, 1, 1, ORDER_HEADERS.length).setValues([ORDER_HEADERS]);
   sheet.setFrozenRows(1);
+}
+
+function getPendingOrderCount_() {
+  const sheet = getOrderSheet_();
+  ensureOrderHeaders_(sheet);
+  return Math.max(0, sheet.getLastRow() - 1);
 }
 
 function isValidEmail_(email) {
