@@ -1460,7 +1460,7 @@
               ${specLabel ? `<p class="popular-spec">${escapeHtml(specLabel)}</p>` : ""}
               <div class="popular-foot">
                 <div class="price">${formatPrice(item.price)}</div>
-                <button class="popular-cart-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(item.name)} 到購物車">${soldOut ? "已售完" : "+購物車"}</button>
+                <button class="popular-cart-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(item.name)} 到購物車">${soldOut ? "已售完" : "➕購物車"}</button>
               </div>
             </div>
           </article>
@@ -1561,7 +1561,7 @@
               <p class="product-desc">${escapeHtml(item.description || item.spec || "手作作品資訊整理中，歡迎先加入購物車。")}</p>
               <div class="product-foot">
                 <div class="price">${formatPrice(item.price)}</div>
-                <button class="add-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""}>${soldOut ? "已售完" : "+購物車"}</button>
+                <button class="add-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""}>${soldOut ? "已售完" : "➕購物車"}</button>
               </div>
             </div>
           </article>
