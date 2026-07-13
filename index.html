@@ -667,6 +667,20 @@
       line-height: 1.75;
     }
 
+    .variant-switch {
+      min-height: 34px;
+      margin: -4px 0 16px;
+      border: 1px solid rgba(126, 143, 101, 0.28);
+      border-radius: 999px;
+      background: rgba(247, 251, 243, 0.86);
+      color: #6c7e57;
+      cursor: pointer;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 0 13px;
+    }
+
     .product-foot {
       display: flex;
       align-items: center;
@@ -1285,6 +1299,15 @@
     let activeCategory = "全部";
     let cart = [];
     let captcha = { question: "", answer: "" };
+    const productVariantGroups = [
+      {
+        primaryName: "寶藏兔(藍)收納盒",
+        alternateName: "寶藏兔(青)收納盒",
+        primaryLabel: "藍色款",
+        alternateLabel: "青色款"
+      }
+    ];
+    const productVariantSelections = {};
 
     const categoryGrid = document.getElementById("categoryGrid");
     const popularGrid = document.getElementById("popularGrid");
@@ -1553,6 +1576,34 @@
         || selectedParts.some(part => productText.includes(part) || part.includes(productText));
     }
 
+    function variantGroupForName(name) {
+      return productVariantGroups.find(group => group.primaryName === name || group.alternateName === name);
+    }
+
+    function findProductByName(name) {
+      return products.find(product => product.name === name);
+    }
+
+    function isHiddenVariantCard(item) {
+      const group = variantGroupForName(item.name);
+      return Boolean(group && item.name === group.alternateName && findProductByName(group.primaryName));
+    }
+
+    function displayVariantForItem(item) {
+      const group = variantGroupForName(item.name);
+      if (!group || item.name !== group.primaryName) return item;
+      const selectedName = productVariantSelections[group.primaryName] || group.primaryName;
+      return findProductByName(selectedName) || item;
+    }
+
+    function variantSwitchHtml(item, displayItem) {
+      const group = variantGroupForName(item.name);
+      if (!group || item.name !== group.primaryName || !findProductByName(group.alternateName)) return "";
+      const showingAlternate = displayItem.name === group.alternateName;
+      const nextLabel = showingAlternate ? group.primaryLabel : group.alternateLabel;
+      return `<button class="variant-switch" type="button" data-primary-name="${escapeAttr(group.primaryName)}" data-next-name="${escapeAttr(showingAlternate ? group.primaryName : group.alternateName)}">切換${escapeHtml(nextLabel)}</button>`;
+    }
+
     function renderProductTabs(nextCategory = activeCategory) {
       const categories = uniqueProductCategories();
       activeCategory = categories.includes(nextCategory) ? nextCategory : preferredProductCategory();
@@ -1573,9 +1624,10 @@
     }
 
     function renderProducts() {
-      const visible = activeCategory === "全部"
+      const visibleSource = activeCategory === "全部"
         ? products
         : products.filter(item => categoryMatches(item.category, activeCategory));
+      const visible = visibleSource.filter(item => !isHiddenVariantCard(item));
 
       shopTitle.textContent = activeCategory === "全部" ? "" : `${activeCategory}商品`;
       shopSubtitle.textContent = "";
@@ -1588,18 +1640,19 @@
       }
 
       productGrid.innerHTML = visible.map(item => {
-        const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
-        const showOutOfStockBadge = item.popular && Number(item.stock) <= 0;
-        const specLabel = formatSpecLabel(item.spec);
-        const codeLabel = String(item.code || "").trim();
-        const categoryLabel = activeCategory.includes("花束") && String(item.category).includes("杯墊") ? "" : item.category;
-        const placeholderLabel = categoryLabel || item.name;
+        const displayItem = displayVariantForItem(item);
+        const soldOut = Number(displayItem.stock) <= 0 || displayItem.status.includes("售完");
+        const showOutOfStockBadge = displayItem.popular && Number(displayItem.stock) <= 0;
+        const specLabel = formatSpecLabel(displayItem.spec);
+        const codeLabel = String(displayItem.code || "").trim();
+        const categoryLabel = activeCategory.includes("花束") && String(displayItem.category).includes("杯墊") ? "" : displayItem.category;
+        const placeholderLabel = categoryLabel || displayItem.name;
         return `
           <article class="product-card">
             ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
             <div class="product-image">
-              ${item.image
-                ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-placeholder" style="display:none">${escapeHtml(placeholderLabel)}</div>`
+              ${displayItem.image
+                ? `<img src="${escapeAttr(displayItem.image)}" alt="${escapeAttr(displayItem.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-placeholder" style="display:none">${escapeHtml(placeholderLabel)}</div>`
                 : `<div class="product-placeholder">${escapeHtml(placeholderLabel)}</div>`}
             </div>
             <div class="product-body">
@@ -1608,13 +1661,14 @@
                 ${specLabel ? `<span>${escapeHtml(specLabel)}</span>` : ""}
               </div>
               <div class="title-row">
-                <h3 class="product-title">${escapeHtml(item.name)}</h3>
+                <h3 class="product-title">${escapeHtml(displayItem.name)}</h3>
                 ${codeLabel ? `<span class="product-code">${escapeHtml(codeLabel)}</span>` : ""}
               </div>
-              <p class="product-desc">${escapeHtml(item.description || item.spec || "手作作品資訊整理中，歡迎先加入購物車。")}</p>
+              <p class="product-desc">${escapeHtml(displayItem.description || displayItem.spec || "手作作品資訊整理中，歡迎先加入購物車。")}</p>
+              ${variantSwitchHtml(item, displayItem)}
               <div class="product-foot">
-                <div class="price">${formatPrice(item.price)}</div>
-                <button class="add-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(item.name)} 到購物車">${soldOut ? "已售完" : "🛒"}</button>
+                <div class="price">${formatPrice(displayItem.price)}</div>
+                <button class="add-button" type="button" data-id="${escapeAttr(displayItem.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(displayItem.name)} 到購物車">${soldOut ? "已售完" : "🛒"}</button>
               </div>
             </div>
           </article>
@@ -1623,6 +1677,12 @@
 
       productGrid.querySelectorAll(".add-button:not([disabled])").forEach(button => {
         button.addEventListener("click", () => addToCart(button.dataset.id));
+      });
+      productGrid.querySelectorAll(".variant-switch").forEach(button => {
+        button.addEventListener("click", () => {
+          productVariantSelections[button.dataset.primaryName] = button.dataset.nextName;
+          renderProducts();
+        });
       });
     }
 
