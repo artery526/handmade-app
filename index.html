@@ -681,6 +681,32 @@
       padding: 0 13px;
     }
 
+    .product-option {
+      display: grid;
+      gap: 6px;
+      margin: -4px 0 16px;
+      color: #7a6250;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .product-option select {
+      min-height: 38px;
+      border: 1px solid rgba(166, 126, 94, 0.26);
+      border-radius: 8px;
+      background: rgba(255, 250, 244, 0.88);
+      color: var(--ink);
+      font: inherit;
+      padding: 7px 10px;
+      outline: none;
+    }
+
+    .cart-option {
+      color: #7c8f65;
+      font-weight: 800;
+    }
+
     .product-foot {
       display: flex;
       align-items: center;
@@ -1308,6 +1334,15 @@
       }
     ];
     const productVariantSelections = {};
+    const hairTieColorOptions = [
+      "咖啡➕黑褐",
+      "漸層➕漸層",
+      "桃粉➕亮黃",
+      "草綠➕青色",
+      "亮粉➕海藍",
+      "單一漸層色"
+    ];
+    const productOptionSelections = {};
 
     const categoryGrid = document.getElementById("categoryGrid");
     const popularGrid = document.getElementById("popularGrid");
@@ -1604,6 +1639,24 @@
       return `<button class="variant-switch" type="button" data-primary-name="${escapeAttr(group.primaryName)}" data-next-name="${escapeAttr(showingAlternate ? group.primaryName : group.alternateName)}">切換${escapeHtml(nextLabel)}</button>`;
     }
 
+    function productOptionHtml(item) {
+      if (item.name !== "手作編織髮圈") return "";
+      const selected = productOptionSelections[item.id] || hairTieColorOptions[0];
+      return `
+        <label class="product-option">
+          顏色搭配
+          <select class="product-option-select" data-id="${escapeAttr(item.id)}">
+            ${hairTieColorOptions.map(option => `<option value="${escapeAttr(option)}" ${option === selected ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
+          </select>
+        </label>
+      `;
+    }
+
+    function selectedOptionForProduct(item) {
+      if (item.name !== "手作編織髮圈") return "";
+      return productOptionSelections[item.id] || hairTieColorOptions[0];
+    }
+
     function renderProductTabs(nextCategory = activeCategory) {
       const categories = uniqueProductCategories();
       activeCategory = categories.includes(nextCategory) ? nextCategory : preferredProductCategory();
@@ -1666,6 +1719,7 @@
               </div>
               <p class="product-desc">${escapeHtml(displayItem.description || displayItem.spec || "手作作品資訊整理中，歡迎先加入購物車。")}</p>
               ${variantSwitchHtml(item, displayItem)}
+              ${productOptionHtml(displayItem)}
               <div class="product-foot">
                 <div class="price">${formatPrice(displayItem.price)}</div>
                 <button class="add-button" type="button" data-id="${escapeAttr(displayItem.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(displayItem.name)} 到購物車">${soldOut ? "已售完" : "🛒"}</button>
@@ -1684,16 +1738,23 @@
           renderProducts();
         });
       });
+      productGrid.querySelectorAll(".product-option-select").forEach(select => {
+        select.addEventListener("change", () => {
+          productOptionSelections[select.dataset.id] = select.value;
+        });
+      });
     }
 
     function addToCart(id) {
       const item = products.find(product => product.id === id);
       if (!item) return;
-      const existing = cart.find(product => product.id === id);
+      const selectedOption = selectedOptionForProduct(item);
+      const cartKey = selectedOption ? `${id}::${selectedOption}` : id;
+      const existing = cart.find(product => product.cartKey === cartKey);
       if (existing) {
         existing.qty += 1;
       } else {
-        cart.push({ ...item, qty: 1 });
+        cart.push({ ...item, cartKey, selectedOption, qty: 1 });
       }
       renderCart();
       showToast("已加入購物車");
@@ -1712,21 +1773,23 @@
 
       cartList.innerHTML = cart.map(item => {
         const codeLabel = String(item.code || "").trim();
+        const optionLabel = String(item.selectedOption || "").trim();
         return `
         <div class="cart-item">
           <div class="title-row">
             <strong>${escapeHtml(item.name)}</strong>
             ${codeLabel ? `<span class="product-code">${escapeHtml(codeLabel)}</span>` : ""}
           </div>
-          <button class="remove-button" type="button" data-id="${escapeAttr(item.id)}">移除</button>
+          <button class="remove-button" type="button" data-key="${escapeAttr(item.cartKey || item.id)}">移除</button>
           <span>${escapeHtml(item.category)} / ${formatPrice(item.price)} × ${item.qty}</span>
+          ${optionLabel ? `<span class="cart-option">顏色搭配：${escapeHtml(optionLabel)}</span>` : ""}
         </div>
       `;
       }).join("");
 
       cartList.querySelectorAll(".remove-button").forEach(button => {
         button.addEventListener("click", () => {
-          cart = cart.filter(item => item.id !== button.dataset.id);
+          cart = cart.filter(item => (item.cartKey || item.id) !== button.dataset.key);
           renderCart();
         });
       });
@@ -1749,7 +1812,7 @@
 
     function buildOrderItemsPayload() {
       return cart.map(item => ({
-        name: item.name,
+        name: item.selectedOption ? `${item.name}（${item.selectedOption}）` : item.name,
         code: item.code || "",
         quantity: item.qty
       }));
