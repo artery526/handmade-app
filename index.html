@@ -1548,30 +1548,32 @@
       }
 
       popularGrid.innerHTML = visible.map((item, index) => {
-        const soldOut = Number(item.stock) <= 0 || item.status.includes("售完");
-        const showOutOfStockBadge = item.popular && Number(item.stock) <= 0;
-        const specLabel = formatSpecLabel(item.spec);
-        const codeLabel = String(item.code || "").trim();
-        const crop = visualCropForCategory(item.category, index);
-        const imageHtml = item.image
-          ? `<img src="${escapeAttr(item.image)}" alt="${escapeAttr(item.name)}" loading="lazy" onerror="this.parentElement.classList.add('${crop}');this.remove()">`
+        const displayItem = displayVariantForItem(item);
+        const soldOut = Number(displayItem.stock) <= 0 || displayItem.status.includes("售完");
+        const showOutOfStockBadge = displayItem.popular && Number(displayItem.stock) <= 0;
+        const specLabel = formatSpecLabel(displayItem.spec);
+        const codeLabel = String(displayItem.code || "").trim();
+        const crop = visualCropForCategory(displayItem.category, index);
+        const imageHtml = displayItem.image
+          ? `<img src="${escapeAttr(displayItem.image)}" alt="${escapeAttr(displayItem.name)}" loading="lazy" onerror="this.parentElement.classList.add('${crop}');this.remove()">`
           : "";
         return `
           <article class="popular-card">
             <div class="popular-rank">NO.${index + 1}</div>
             ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
-            <div class="popular-image ${item.image ? "" : crop}">
+            <div class="popular-image ${displayItem.image ? "" : crop}">
               ${imageHtml}
             </div>
             <div class="popular-body">
               <div class="title-row">
-                <h3>${escapeHtml(item.name)}</h3>
+                <h3>${escapeHtml(displayItem.name)}</h3>
                 ${codeLabel ? `<span class="product-code">${escapeHtml(codeLabel)}</span>` : ""}
               </div>
               ${specLabel ? `<p class="popular-spec">${escapeHtml(specLabel)}</p>` : ""}
+              ${variantSwitchHtml(item, displayItem)}
               <div class="popular-foot">
-                <div class="price">${formatPrice(item.price)}</div>
-                <button class="popular-cart-button" type="button" data-id="${escapeAttr(item.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(item.name)} 到購物車">${soldOut ? "已售完" : "🛒"}</button>
+                <div class="price">${formatPrice(displayItem.price)}</div>
+                <button class="popular-cart-button" type="button" data-id="${escapeAttr(displayItem.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(displayItem.name)} 到購物車">${soldOut ? "已售完" : "🛒"}</button>
               </div>
             </div>
           </article>
@@ -1581,6 +1583,7 @@
       popularGrid.querySelectorAll(".popular-cart-button:not([disabled])").forEach(button => {
         button.addEventListener("click", () => addToCart(button.dataset.id));
       });
+      bindVariantSwitches(popularGrid);
     }
 
     function preferredProductCategory() {
@@ -1637,6 +1640,16 @@
       const showingAlternate = displayItem.name === group.alternateName;
       const nextLabel = showingAlternate ? group.primaryLabel : group.alternateLabel;
       return `<button class="variant-switch" type="button" data-primary-name="${escapeAttr(group.primaryName)}" data-next-name="${escapeAttr(showingAlternate ? group.primaryName : group.alternateName)}">切換${escapeHtml(nextLabel)}</button>`;
+    }
+
+    function bindVariantSwitches(root) {
+      root.querySelectorAll(".variant-switch").forEach(button => {
+        button.addEventListener("click", () => {
+          productVariantSelections[button.dataset.primaryName] = button.dataset.nextName;
+          renderPopularProducts();
+          renderProducts();
+        });
+      });
     }
 
     function productOptionHtml(item) {
@@ -1732,12 +1745,7 @@
       productGrid.querySelectorAll(".add-button:not([disabled])").forEach(button => {
         button.addEventListener("click", () => addToCart(button.dataset.id));
       });
-      productGrid.querySelectorAll(".variant-switch").forEach(button => {
-        button.addEventListener("click", () => {
-          productVariantSelections[button.dataset.primaryName] = button.dataset.nextName;
-          renderProducts();
-        });
-      });
+      bindVariantSwitches(productGrid);
       productGrid.querySelectorAll(".product-option-select").forEach(select => {
         select.addEventListener("change", () => {
           productOptionSelections[select.dataset.id] = select.value;
