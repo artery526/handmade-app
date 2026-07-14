@@ -1336,7 +1336,7 @@
         key: "treasure-rabbit-storage",
         variants: [
           { name: "寶藏兔(湖水藍)收納盒", label: "湖水藍款" },
-          { name: "寶藏兔(青)收納盒", label: "青色款" },
+          { name: "寶藏兔(奶油黃)收納盒", label: "奶油黃款" },
           { name: "寶藏兔(藍)收納盒", label: "藍色款" }
         ]
       }
@@ -1721,11 +1721,20 @@
       if (options.scroll) document.getElementById("shop").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
+    function sortProductsForDisplay(items) {
+      if (activeCategory !== "全部") return items;
+      return [...items].sort((a, b) => {
+        const sortA = Number.isFinite(a.sort) ? a.sort : 0;
+        const sortB = Number.isFinite(b.sort) ? b.sort : 0;
+        return sortB - sortA || a.name.localeCompare(b.name, "zh-Hant");
+      });
+    }
+
     function renderProducts() {
       const visibleSource = activeCategory === "全部"
         ? products
         : products.filter(item => categoryMatches(item.category, activeCategory));
-      const visible = visibleSource.filter(item => !isHiddenVariantCard(item));
+      const visible = sortProductsForDisplay(visibleSource).filter(item => !isHiddenVariantCard(item));
 
       shopTitle.textContent = activeCategory === "全部" ? "" : `${activeCategory}商品`;
       shopSubtitle.textContent = "";
