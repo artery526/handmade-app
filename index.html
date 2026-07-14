@@ -669,7 +669,6 @@
 
     .variant-switch {
       min-height: 34px;
-      margin: -4px 0 16px;
       border: 1px solid rgba(126, 143, 101, 0.28);
       border-radius: 999px;
       background: rgba(247, 251, 243, 0.86);
@@ -679,6 +678,13 @@
       font-size: 13px;
       font-weight: 800;
       padding: 0 13px;
+    }
+
+    .variant-switches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: -4px 0 16px;
     }
 
     .product-option {
@@ -1327,10 +1333,12 @@
     let captcha = { question: "", answer: "" };
     const productVariantGroups = [
       {
-        primaryName: "寶藏兔(藍)收納盒",
-        alternateName: "寶藏兔(青)收納盒",
-        primaryLabel: "藍色款",
-        alternateLabel: "青色款"
+        key: "treasure-rabbit-storage",
+        variants: [
+          { name: "寶藏兔(湖水藍)收納盒", label: "湖水藍款" },
+          { name: "寶藏兔(青)收納盒", label: "青色款" },
+          { name: "寶藏兔(藍)收納盒", label: "藍色款" }
+        ]
       }
     ];
     const productVariantSelections = {};
@@ -1541,7 +1549,15 @@
     }
 
     function renderPopularProducts() {
-      const visible = products.filter(item => item.popular);
+      const seenPopularGroups = new Set();
+      const visible = products.filter(item => {
+        if (!item.popular) return false;
+        const group = variantGroupForName(item.name);
+        if (!group) return true;
+        if (seenPopularGroups.has(group.key)) return false;
+        seenPopularGroups.add(group.key);
+        return true;
+      });
       if (!visible.length) {
         popularGrid.innerHTML = '<div class="empty">目前還沒有可顯示的人氣作品。</div>';
         return;
@@ -1615,37 +1631,53 @@
     }
 
     function variantGroupForName(name) {
-      return productVariantGroups.find(group => group.primaryName === name || group.alternateName === name);
+      return productVariantGroups.find(group => group.variants.some(variant => variant.name === name));
     }
 
     function findProductByName(name) {
       return products.find(product => product.name === name);
     }
 
+    function availableVariantOptions(group) {
+      return group.variants
+        .map(variant => ({ ...variant, product: findProductByName(variant.name) }))
+        .filter(variant => variant.product);
+    }
+
+    function variantAnchorName(group) {
+      return availableVariantOptions(group)[0]?.name || group.variants[0]?.name || "";
+    }
+
     function isHiddenVariantCard(item) {
       const group = variantGroupForName(item.name);
-      return Boolean(group && item.name === group.alternateName && findProductByName(group.primaryName));
+      if (!group) return false;
+      const anchorName = variantAnchorName(group);
+      return Boolean(anchorName && item.name !== anchorName && findProductByName(anchorName));
     }
 
     function displayVariantForItem(item) {
       const group = variantGroupForName(item.name);
-      if (!group || item.name !== group.primaryName) return item;
-      const selectedName = productVariantSelections[group.primaryName] || group.primaryName;
+      if (!group) return item;
+      const selectedName = productVariantSelections[group.key] || item.name;
       return findProductByName(selectedName) || item;
     }
 
     function variantSwitchHtml(item, displayItem) {
       const group = variantGroupForName(item.name);
-      if (!group || item.name !== group.primaryName || !findProductByName(group.alternateName)) return "";
-      const showingAlternate = displayItem.name === group.alternateName;
-      const nextLabel = showingAlternate ? group.primaryLabel : group.alternateLabel;
-      return `<button class="variant-switch" type="button" data-primary-name="${escapeAttr(group.primaryName)}" data-next-name="${escapeAttr(showingAlternate ? group.primaryName : group.alternateName)}">切換${escapeHtml(nextLabel)}</button>`;
+      if (!group) return "";
+      const options = availableVariantOptions(group).filter(variant => variant.name !== displayItem.name);
+      if (!options.length) return "";
+      return `
+        <div class="variant-switches">
+          ${options.map(variant => `<button class="variant-switch" type="button" data-variant-key="${escapeAttr(group.key)}" data-next-name="${escapeAttr(variant.name)}">切換${escapeHtml(variant.label)}</button>`).join("")}
+        </div>
+      `;
     }
 
     function bindVariantSwitches(root) {
       root.querySelectorAll(".variant-switch").forEach(button => {
         button.addEventListener("click", () => {
-          productVariantSelections[button.dataset.primaryName] = button.dataset.nextName;
+          productVariantSelections[button.dataset.variantKey] = button.dataset.nextName;
           renderPopularProducts();
           renderProducts();
         });
