@@ -167,6 +167,12 @@
       filter: saturate(0.92) brightness(1.06);
     }
 
+    .hero picture {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     .hero::after {
       content: "";
       position: absolute;
@@ -298,7 +304,10 @@
     }
 
     .category-image, .popular-image {
-      background-image: url("assets/emily-hero-wide.png");
+      background-image: image-set(
+        url("assets/emily-hero-wide.webp") type("image/webp"),
+        url("assets/emily-hero-wide.png") type("image/png")
+      );
       background-size: 250% auto;
       background-repeat: no-repeat;
     }
@@ -521,6 +530,11 @@
       object-fit: cover;
       border-radius: 8px;
       border: 1px solid rgba(166, 126, 94, 0.16);
+    }
+
+    .story-panel picture {
+      display: block;
+      width: 100%;
     }
 
     .story-copy p {
@@ -1139,7 +1153,10 @@
   </header>
 
   <section class="hero" id="top" aria-label="Emily 手作工坊主視覺">
-    <img class="hero-image" src="assets/emily-hero-wide.png" alt="Emily 手作工坊主視覺">
+    <picture>
+      <source srcset="assets/emily-hero-wide.webp" type="image/webp">
+      <img class="hero-image" src="assets/emily-hero-wide.png" alt="Emily 手作工坊主視覺" fetchpriority="high" decoding="async">
+    </picture>
   </section>
 
   <main>
@@ -1193,7 +1210,10 @@
           </div>
           <div class="order-watermark" id="orderWatermark" aria-live="polite"></div>
         </div>
-        <img class="story-image" src="Downsize.png" alt="Emily 手作工坊作品展示" loading="lazy">
+        <picture>
+          <source srcset="Downsize.webp" type="image/webp">
+          <img class="story-image" src="Downsize.png" alt="Emily 手作工坊作品展示" loading="lazy" decoding="async">
+        </picture>
       </div>
     </section>
   </main>
@@ -1306,7 +1326,7 @@
         en: "Crochet Bouquet",
         description: "溫暖送禮首選，傳遞心意的花",
         crop: "crop-bouquet",
-        video: "flowerc.mp4",
+        video: "flowerc-fast.mp4",
         targetCategory: "花束"
       },
       {
@@ -1314,7 +1334,7 @@
         en: "Crochet Coaster & Hair Tie",
         description: "實用又療癒，點亮日常小角落",
         crop: "crop-coaster",
-        video: "cuphair.mp4",
+        video: "cuphair-fast.mp4",
         targetCategory: "杯墊&髮圈"
       },
       {
@@ -1322,7 +1342,7 @@
         en: "Handmade Goods",
         description: "生活裡的小巧心意與溫柔陪伴",
         crop: "crop-hairtie",
-        video: "other.mp4",
+        video: "other-fast.mp4",
         targetCategory: "手作其它"
       }
     ];
@@ -1455,9 +1475,9 @@
     function normalizeImageUrl(url) {
       const raw = String(url || "").trim();
       const driveMatch = raw.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-      if (driveMatch) return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000`;
+      if (driveMatch) return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w600`;
       const openMatch = raw.match(/[?&]id=([^&]+)/);
-      if (raw.includes("drive.google.com") && openMatch) return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w1000`;
+      if (raw.includes("drive.google.com") && openMatch) return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w600`;
       return raw;
     }
 
@@ -1486,9 +1506,17 @@
         products = sampleProducts;
         sheetStatus.textContent = "";
       }
-      renderCategories();
       renderProductTabs(preferredProductCategory());
       renderPopularProducts();
+    }
+
+    function scheduleOrderWatermarkLoad() {
+      const load = () => loadOrderWatermark();
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(load, { timeout: 2400 });
+      } else {
+        window.setTimeout(load, 1400);
+      }
     }
 
     async function loadOrderWatermark() {
@@ -1506,7 +1534,7 @@
       categoryGrid.innerHTML = categoryCards.map(card => `
         <article class="category-card">
           ${card.video
-            ? `<video class="category-video" src="${escapeAttr(card.video)}" autoplay muted playsinline preload="metadata" aria-label="${escapeAttr(card.category)}動態展示"></video>`
+            ? `<video class="category-video" data-src="${escapeAttr(card.video)}" muted playsinline preload="none" aria-label="${escapeAttr(card.category)}動態展示"></video>`
             : `<div class="category-image ${card.crop}" aria-hidden="true"></div>`}
           <h3>${escapeHtml(card.category)}</h3>
           <div class="category-en">${escapeHtml(card.en)}</div>
@@ -1524,8 +1552,15 @@
     }
 
     function setupCategoryVideos() {
+      const loadVideo = video => {
+        if (!video.dataset.src || video.src) return;
+        video.src = video.dataset.src;
+        video.load();
+      };
+
       categoryGrid.querySelectorAll(".category-video").forEach(video => {
         const startLoop = () => {
+          loadVideo(video);
           video.loop = true;
           if (video.ended || video.paused) video.currentTime = 0;
           video.play().catch(() => {});
@@ -1539,6 +1574,24 @@
         video.addEventListener("click", startLoop);
         video.addEventListener("touchstart", startLoop, { passive: true });
       });
+
+      const videos = Array.from(categoryGrid.querySelectorAll(".category-video"));
+      if (!("IntersectionObserver" in window)) {
+        videos.forEach(loadVideo);
+        return;
+      }
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const video = entry.target;
+          loadVideo(video);
+          video.play().catch(() => {});
+          observer.unobserve(video);
+        });
+      }, { rootMargin: "240px 0px", threshold: 0.15 });
+
+      videos.forEach(video => observer.observe(video));
     }
 
     function visualCropForCategory(category, index = 0) {
@@ -1959,8 +2012,9 @@
     orderForm.addEventListener("submit", submitOrderForm);
     createCaptcha();
     renderCart();
-    loadOrderWatermark();
+    renderCategories();
     loadProducts();
+    scheduleOrderWatermarkLoad();
   </script>
 </body>
 </html>
