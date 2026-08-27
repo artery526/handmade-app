@@ -39,6 +39,18 @@
       font: inherit;
     }
 
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .site-header {
       position: sticky;
       top: 0;
@@ -132,6 +144,33 @@
       color: #fffaf4;
       border-color: transparent;
       gap: 8px;
+    }
+
+    .purchase-guide-button {
+      width: 142px;
+      height: 48px;
+      padding: 0;
+      border: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: transparent;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(109, 77, 53, 0.12);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .purchase-guide-button:hover,
+    .purchase-guide-button:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(109, 77, 53, 0.2);
+    }
+
+    .purchase-guide-button img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
     }
 
     .cart-count {
@@ -842,6 +881,63 @@
       flex-direction: column;
     }
 
+    .guide-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(66, 43, 31, 0.62);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .guide-modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .guide-modal-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(100%, 760px);
+      max-height: calc(100vh - 48px);
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 18px;
+      background: var(--paper-solid);
+      box-shadow: 0 24px 70px rgba(48, 29, 18, 0.3);
+    }
+
+    .guide-modal-image {
+      display: block;
+      max-width: 100%;
+      max-height: calc(100vh - 72px);
+      width: auto;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .guide-modal-close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 1;
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 250, 243, 0.94);
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 24px;
+      line-height: 1;
+    }
+
     .cart-drawer.open {
       transform: translateX(0);
     }
@@ -1083,6 +1179,12 @@
         padding: 0 12px;
       }
 
+      .purchase-guide-button {
+        width: 112px;
+        height: 38px;
+        border-radius: 10px;
+      }
+
       .hero {
         height: 220px;
       }
@@ -1145,6 +1247,9 @@
         <span class="brand-sub">Handmade with Love</span>
       </a>
       <div class="nav-actions">
+        <button class="purchase-guide-button" type="button" id="openPurchaseGuide" aria-label="查看購買流程">
+          <img src="button.png" alt="購買流程">
+        </button>
         <button class="cart-button" type="button" id="openCart">
           🧸購物車 <span class="cart-count" id="cartCount">0</span>
         </button>
@@ -1217,6 +1322,14 @@
       </div>
     </section>
   </main>
+
+  <div class="guide-modal" id="purchaseGuideModal" role="dialog" aria-modal="true" aria-labelledby="purchaseGuideTitle" aria-hidden="true">
+    <div class="guide-modal-card">
+      <h2 id="purchaseGuideTitle" class="sr-only">購買流程</h2>
+      <button class="guide-modal-close" type="button" id="closePurchaseGuide" aria-label="關閉購買流程">×</button>
+      <img class="guide-modal-image" src="process.png" alt="Emily 手作工坊購買流程圖" loading="lazy">
+    </div>
+  </div>
 
   <aside class="cart-drawer" id="cartDrawer" aria-label="購物車" aria-hidden="true">
     <div class="cart-head">
@@ -1389,6 +1502,8 @@
     const cartList = document.getElementById("cartList");
     const cartCount = document.getElementById("cartCount");
     const cartTotal = document.getElementById("cartTotal");
+    const purchaseGuideModal = document.getElementById("purchaseGuideModal");
+    const closePurchaseGuide = document.getElementById("closePurchaseGuide");
     const orderForm = document.getElementById("orderForm");
     const buyerEmail = document.getElementById("buyerEmail");
     const buyerPhone = document.getElementById("buyerPhone");
@@ -2023,6 +2138,29 @@
     document.getElementById("closeCart").addEventListener("click", () => {
       cartDrawer.classList.remove("open");
       cartDrawer.setAttribute("aria-hidden", "true");
+    });
+
+    function closePurchaseGuideModal() {
+      purchaseGuideModal.classList.remove("open");
+      purchaseGuideModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    document.getElementById("openPurchaseGuide").addEventListener("click", () => {
+      purchaseGuideModal.classList.add("open");
+      purchaseGuideModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      closePurchaseGuide.focus();
+    });
+
+    closePurchaseGuide.addEventListener("click", closePurchaseGuideModal);
+    purchaseGuideModal.addEventListener("click", event => {
+      if (event.target === purchaseGuideModal) closePurchaseGuideModal();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && purchaseGuideModal.classList.contains("open")) {
+        closePurchaseGuideModal();
+      }
     });
 
     document.getElementById("refreshCaptcha").addEventListener("click", createCaptcha);
