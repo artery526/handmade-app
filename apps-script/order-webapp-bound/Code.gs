@@ -1,4 +1,5 @@
 const ORDER_SHEET_NAME = '\u5BA2\u6236\u55AE';
+const ORDER_SPREADSHEET_ID = '1H7rhWYzcl7-VsHpaGTIyaF7LeVlZpOP6ed3Eeub8AOg';
 const ORDER_HEADERS = [
   '\u4E0B\u55AE\u6642\u9593',
   '\u8CFC\u8CB7\u5546\u54C1\u5305\u542B\u7DE8\u865F',
@@ -129,7 +130,7 @@ function formatOrderItems_(items) {
 }
 
 function getOrderSheet_() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const spreadsheet = SpreadsheetApp.openById(ORDER_SPREADSHEET_ID);
   return spreadsheet.getSheetByName(ORDER_SHEET_NAME) || spreadsheet.insertSheet(ORDER_SHEET_NAME);
 }
 
