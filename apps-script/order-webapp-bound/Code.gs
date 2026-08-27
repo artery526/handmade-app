@@ -4,7 +4,8 @@ const ORDER_HEADERS = [
   '\u4E0B\u55AE\u6642\u9593',
   '\u8CFC\u8CB7\u5546\u54C1\u5305\u542B\u7DE8\u865F',
   '\u4E0B\u55AE\u6578\u91CF',
-  '\u96FB\u5B50\u90F5\u4EF6\u4FE1\u7BB1'
+  '\u96FB\u5B50\u90F5\u4EF6\u4FE1\u7BB1',
+  '\u806F\u7D61\u96FB\u8A71'
 ];
 const MAX_ORDER_QUANTITY = 20;
 
@@ -22,10 +23,15 @@ function doPost(e) {
   try {
     const payload = parseOrderPayload_(e);
     const email = String(payload.email || '').trim();
+    const phone = String(payload.phone || '').trim();
     const items = parseItems_(payload.items);
 
     if (!isValidEmail_(email)) {
       return jsonResponse_({ ok: false, error: 'Invalid email.' });
+    }
+
+    if (!isValidPhone_(phone)) {
+      return jsonResponse_({ ok: false, error: 'Invalid phone.' });
     }
 
     if (String(payload.website || '').trim()) {
@@ -55,7 +61,8 @@ function doPost(e) {
         new Date(),
         formatOrderItems_(normalizedItems),
         totalQuantity,
-        email
+        email,
+        phone
       ]);
     } finally {
       lock.releaseLock();
@@ -154,6 +161,10 @@ function getPendingOrderCount_() {
 
 function isValidEmail_(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidPhone_(phone) {
+  return /^[0-9+()\-\s]{8,20}$/.test(phone);
 }
 
 function jsonResponse_(payload) {

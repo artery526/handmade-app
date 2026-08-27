@@ -1234,6 +1234,10 @@
           電子郵件信箱
           <input class="cart-input" id="buyerEmail" name="email" type="email" autocomplete="email" placeholder="請輸入聯絡電子郵件信箱" required>
         </label>
+        <label class="cart-field" for="buyerPhone">
+          聯絡電話
+          <input class="cart-input" id="buyerPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="請輸入聯絡電話" required>
+        </label>
         <label class="cart-field" for="captchaAnswer">
           驗證碼
           <span class="captcha-row">
@@ -1387,6 +1391,7 @@
     const cartTotal = document.getElementById("cartTotal");
     const orderForm = document.getElementById("orderForm");
     const buyerEmail = document.getElementById("buyerEmail");
+    const buyerPhone = document.getElementById("buyerPhone");
     const captchaQuestion = document.getElementById("captchaQuestion");
     const captchaAnswer = document.getElementById("captchaAnswer");
     const websiteField = document.getElementById("websiteField");
@@ -1912,6 +1917,10 @@
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
     }
 
+    function isValidPhone(value) {
+      return /^[0-9+()\-\s]{8,20}$/.test(String(value || "").trim());
+    }
+
     function buildOrderItemsPayload() {
       return cart.map(item => ({
         name: item.selectedOption ? `${item.name}（${item.selectedOption}）` : item.name,
@@ -1935,6 +1944,13 @@
         return;
       }
 
+      const phone = buyerPhone.value.trim();
+      if (!isValidPhone(phone)) {
+        showToast("請填寫正確的聯絡電話");
+        buyerPhone.focus();
+        return;
+      }
+
       if (captchaAnswer.value.trim() !== captcha.answer) {
         showToast("驗證碼答案不正確");
         createCaptcha();
@@ -1949,6 +1965,7 @@
 
       const formData = new URLSearchParams();
       formData.set("email", email);
+      formData.set("phone", phone);
       formData.set("items", JSON.stringify(buildOrderItemsPayload()));
       formData.set("website", websiteField.value.trim());
 
