@@ -475,6 +475,7 @@
       aspect-ratio: 4 / 3;
       background-size: 270% auto;
       border-bottom: 1px solid var(--line);
+      cursor: zoom-in;
     }
 
     .popular-image img {
@@ -482,6 +483,10 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+
+    .popular-image[data-lightbox-image] {
+      height: 100%;
     }
 
     .popular-body {
@@ -679,6 +684,7 @@
       background: linear-gradient(135deg, #f9e7d8, #f7f0e6);
       position: relative;
       overflow: hidden;
+      cursor: zoom-in;
     }
 
     .product-image img {
@@ -686,6 +692,10 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+
+    .product-image > [data-lightbox-image] {
+      height: 100%;
     }
 
     .product-placeholder {
@@ -947,6 +957,70 @@
       cursor: pointer;
       font-size: 24px;
       line-height: 1;
+    }
+
+    .product-lightbox-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: min(100%, 980px);
+      max-height: calc(100vh - 48px);
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 18px;
+      background: var(--paper-solid);
+      box-shadow: 0 24px 70px rgba(48, 29, 18, 0.3);
+    }
+
+    .product-lightbox-image-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-height: calc(100vh - 150px);
+      overflow: auto;
+      border-radius: 10px;
+      background: #f6eee5;
+    }
+
+    .product-lightbox-image {
+      display: block;
+      max-width: 100%;
+      max-height: calc(100vh - 150px);
+      width: auto;
+      height: auto;
+      transform-origin: center center;
+      transition: transform 0.15s ease;
+      user-select: none;
+    }
+
+    .product-lightbox-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    .product-lightbox-control {
+      min-width: 42px;
+      min-height: 36px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fffaf4;
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .product-lightbox-control:hover,
+    .product-lightbox-control:focus-visible {
+      background: var(--sage);
+      color: #fff;
+      outline: none;
     }
 
     .cart-drawer.open {
@@ -1347,6 +1421,21 @@
     </div>
   </div>
 
+  <div class="guide-modal" id="productLightbox" role="dialog" aria-modal="true" aria-labelledby="productLightboxTitle" aria-hidden="true">
+    <div class="product-lightbox-card">
+      <h2 id="productLightboxTitle" class="sr-only">商品圖片</h2>
+      <button class="guide-modal-close" type="button" id="closeProductLightbox" aria-label="關閉商品圖片">×</button>
+      <div class="product-lightbox-image-wrap">
+        <img class="product-lightbox-image" id="productLightboxImage" alt="" decoding="async">
+      </div>
+      <div class="product-lightbox-controls" aria-label="圖片縮放控制">
+        <button class="product-lightbox-control" type="button" id="zoomOutProductImage" aria-label="縮小圖片">−</button>
+        <button class="product-lightbox-control" type="button" id="resetProductImage" aria-label="重設圖片大小">100%</button>
+        <button class="product-lightbox-control" type="button" id="zoomInProductImage" aria-label="放大圖片">＋</button>
+      </div>
+    </div>
+  </div>
+
   <aside class="cart-drawer" id="cartDrawer" aria-label="購物車" aria-hidden="true">
     <div class="cart-head">
       <h2>🧸購物車</h2>
@@ -1520,6 +1609,12 @@
     const cartTotal = document.getElementById("cartTotal");
     const purchaseGuideModal = document.getElementById("purchaseGuideModal");
     const closePurchaseGuide = document.getElementById("closePurchaseGuide");
+    const productLightbox = document.getElementById("productLightbox");
+    const closeProductLightbox = document.getElementById("closeProductLightbox");
+    const productLightboxImage = document.getElementById("productLightboxImage");
+    const zoomOutProductImage = document.getElementById("zoomOutProductImage");
+    const resetProductImage = document.getElementById("resetProductImage");
+    const zoomInProductImage = document.getElementById("zoomInProductImage");
     const orderForm = document.getElementById("orderForm");
     const buyerEmail = document.getElementById("buyerEmail");
     const buyerPhone = document.getElementById("buyerPhone");
@@ -1615,6 +1710,12 @@
       const openMatch = raw.match(/[?&]id=([^&]+)/);
       if (raw.includes("drive.google.com") && openMatch) return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w600`;
       return raw;
+    }
+
+    function fullImageUrl(url) {
+      const raw = String(url || "").trim();
+      const driveMatch = raw.match(/drive\.google\.com\/(?:file\/d\/|thumbnail\?id=)([^/&]+)/);
+      return driveMatch ? `https://drive.google.com/uc?export=view&id=${driveMatch[1]}` : raw;
     }
 
     function formatPrice(value) {
@@ -1766,7 +1867,7 @@
           <article class="popular-card">
             <div class="popular-rank">NO.${index + 1}</div>
             ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
-            <div class="popular-image ${displayItem.image ? "" : crop}">
+            <div class="popular-image ${displayItem.image ? "" : crop}"${displayItem.image ? ` role="button" tabindex="0" data-lightbox-image="${escapeAttr(displayItem.image)}" data-lightbox-alt="${escapeAttr(displayItem.name)}" aria-label="查看 ${escapeAttr(displayItem.name)} 大圖"` : ""}>
               ${imageHtml}
             </div>
             <div class="popular-body">
@@ -1948,7 +2049,7 @@
             ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
             <div class="product-image">
               ${displayItem.image
-                ? `<img src="${escapeAttr(displayItem.image)}" alt="${escapeAttr(displayItem.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-placeholder" style="display:none">${escapeHtml(placeholderLabel)}</div>`
+                ? `<div role="button" tabindex="0" data-lightbox-image="${escapeAttr(displayItem.image)}" data-lightbox-alt="${escapeAttr(displayItem.name)}" aria-label="查看 ${escapeAttr(displayItem.name)} 大圖"><img src="${escapeAttr(displayItem.image)}" alt="${escapeAttr(displayItem.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-placeholder" style="display:none">${escapeHtml(placeholderLabel)}</div></div>`
                 : `<div class="product-placeholder">${escapeHtml(placeholderLabel)}</div>`}
             </div>
             <div class="product-body">
@@ -2132,6 +2233,47 @@
       showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1800);
     }
 
+    let productImageScale = 1;
+
+    function renderProductImageScale() {
+      productLightboxImage.style.transform = `scale(${productImageScale})`;
+      resetProductImage.textContent = `${Math.round(productImageScale * 100)}%`;
+    }
+
+    function openProductLightbox(trigger) {
+      const imageUrl = trigger?.dataset.lightboxImage;
+      if (!imageUrl) return;
+      productImageScale = 1;
+      productLightboxImage.src = fullImageUrl(imageUrl);
+      productLightboxImage.alt = trigger.dataset.lightboxAlt || "商品圖片";
+      renderProductImageScale();
+      productLightbox.classList.add("open");
+      productLightbox.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      closeProductLightbox.focus();
+    }
+
+    function closeProductImageLightbox() {
+      productLightbox.classList.remove("open");
+      productLightbox.setAttribute("aria-hidden", "true");
+      productLightboxImage.removeAttribute("src");
+      document.body.style.overflow = "";
+    }
+
+    function bindProductImageLightbox(grid) {
+      grid.addEventListener("click", event => {
+        const trigger = event.target.closest("[data-lightbox-image]");
+        if (trigger && grid.contains(trigger)) openProductLightbox(trigger);
+      });
+      grid.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const trigger = event.target.closest("[data-lightbox-image]");
+        if (!trigger || !grid.contains(trigger)) return;
+        event.preventDefault();
+        openProductLightbox(trigger);
+      });
+    }
+
     function escapeHtml(value) {
       return String(value || "").replace(/[&<>"']/g, char => ({
         "&": "&amp;",
@@ -2173,6 +2315,35 @@
     purchaseGuideModal.addEventListener("click", event => {
       if (event.target === purchaseGuideModal) closePurchaseGuideModal();
     });
+
+    closeProductLightbox.addEventListener("click", closeProductImageLightbox);
+    productLightbox.addEventListener("click", event => {
+      if (event.target === productLightbox) closeProductImageLightbox();
+    });
+    zoomInProductImage.addEventListener("click", () => {
+      productImageScale = Math.min(3, productImageScale + 0.25);
+      renderProductImageScale();
+    });
+    zoomOutProductImage.addEventListener("click", () => {
+      productImageScale = Math.max(0.5, productImageScale - 0.25);
+      renderProductImageScale();
+    });
+    resetProductImage.addEventListener("click", () => {
+      productImageScale = 1;
+      renderProductImageScale();
+    });
+    productLightboxImage.addEventListener("wheel", event => {
+      event.preventDefault();
+      productImageScale = Math.max(0.5, Math.min(3, productImageScale + (event.deltaY < 0 ? 0.1 : -0.1)));
+      renderProductImageScale();
+    }, { passive: false });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && productLightbox.classList.contains("open")) {
+        closeProductImageLightbox();
+      }
+    });
+    bindProductImageLightbox(productGrid);
+    bindProductImageLightbox(popularGrid);
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && purchaseGuideModal.classList.contains("open")) {
         closePurchaseGuideModal();
