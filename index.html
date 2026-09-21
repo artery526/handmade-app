@@ -435,6 +435,10 @@
       text-align: left;
     }
 
+    .popular-gallery-wrap {
+      position: relative;
+    }
+
     .stock-badge {
       position: absolute;
       top: 12px;
@@ -450,6 +454,36 @@
       font-weight: 900;
       letter-spacing: 0.08em;
       box-shadow: 0 10px 22px rgba(201, 75, 67, 0.34);
+    }
+
+    .special-offer-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 4;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+      min-width: 74px;
+      padding: 8px 10px 7px;
+      border: 2px solid #fff7e8;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #e84f4f, #b92735);
+      color: #fff;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: 0.04em;
+      box-shadow: 0 8px 18px rgba(185, 39, 53, 0.35);
+      transform: rotate(3deg);
+      pointer-events: none;
+    }
+
+    .special-offer-badge strong {
+      font-size: 16px;
+      letter-spacing: 0.02em;
     }
 
     .popular-rank {
@@ -1942,6 +1976,16 @@
       return ["crop-bouquet", "crop-coaster", "crop-hairtie", "crop-story"][index % 4];
     }
 
+    function isHairTieProduct(item) {
+      return String(item?.name || "").includes("髮圈") || String(item?.category || "").includes("髮圈");
+    }
+
+    function promotionBadgeHtml(item) {
+      return isHairTieProduct(item)
+        ? '<span class="special-offer-badge" aria-label="手作編織髮圈特價，3個100元">特價<strong>3個100元</strong></span>'
+        : "";
+    }
+
     function renderPopularProducts() {
       const seenPopularGroups = new Set();
       const visible = products.filter(item => {
@@ -1968,7 +2012,10 @@
           <article class="popular-card">
             <div class="popular-rank">NO.${index + 1}</div>
             ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
-            ${galleryHtml(displayItem, `popular-image ${imageUrlsForProduct(displayItem).length ? "" : crop}`, displayItem.name)}
+            <div class="popular-gallery-wrap">
+              ${promotionBadgeHtml(displayItem)}
+              ${galleryHtml(displayItem, `popular-image ${imageUrlsForProduct(displayItem).length ? "" : crop}`, displayItem.name)}
+            </div>
             <div class="popular-body">
               <div class="title-row">
                 <h3>${escapeHtml(displayItem.name)}</h3>
@@ -2146,7 +2193,10 @@
         return `
           <article class="product-card">
             ${showOutOfStockBadge ? '<div class="stock-badge">缺貨</div>' : ""}
-            <div class="product-image">${galleryHtml(displayItem, "product-gallery", placeholderLabel)}</div>
+            <div class="product-image">
+              ${promotionBadgeHtml(displayItem)}
+              ${galleryHtml(displayItem, "product-gallery", placeholderLabel)}
+            </div>
             <div class="product-body">
               <div class="product-meta">
                 ${categoryLabel ? `<span>${escapeHtml(categoryLabel)}</span>` : ""}
