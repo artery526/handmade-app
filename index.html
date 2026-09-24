@@ -147,16 +147,17 @@
     }
 
     .line-link {
-      width: 40px;
+      width: 112px;
       height: 40px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       border: 1px solid rgba(31, 177, 43, 0.32);
-      border-radius: 50%;
+      border-radius: 999px;
       background: #fff;
       box-shadow: 0 8px 20px rgba(31, 177, 43, 0.16);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
     }
 
     .line-link:hover,
@@ -167,9 +168,11 @@
 
     .line-link img {
       display: block;
-      width: 30px;
-      height: 30px;
+      width: 100%;
+      height: 100%;
+      padding: 3px;
       object-fit: contain;
+      border-radius: inherit;
     }
 
     .purchase-guide-button {
@@ -1515,6 +1518,11 @@
       .cart-button {
         min-height: 38px;
         padding: 0 12px;
+      }
+
+      .line-link {
+        width: 88px;
+        height: 38px;
       }
 
       .purchase-guide-button {
