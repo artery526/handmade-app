@@ -1486,7 +1486,18 @@
 
     @media (max-width: 640px) {
       .cart-field-row {
-        grid-template-columns: 1fr;
+        display: contents;
+      }
+
+      .cart-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #orderForm label[for="pickupStore"],
+      #orderForm label[for="buyerEmail"],
+      #orderForm label[for="captchaAnswer"],
+      #orderForm .submit-order {
+        grid-column: 1 / -1;
       }
 
       .nav {
