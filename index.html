@@ -1748,6 +1748,16 @@
       "亮粉➕海藍",
       "單一漸層色"
     ];
+    const moonPendantColorOptions = [
+      "湖水藍",
+      "柔光黃",
+      "炫彩版",
+      "暖陽橘"
+    ];
+    const productColorOptions = {
+      "手作編織髮圈": hairTieColorOptions,
+      "手工編織月餅吊飾(可挑色)": moonPendantColorOptions
+    };
     const productOptionSelections = {};
 
     const categoryGrid = document.getElementById("categoryGrid");
@@ -2181,21 +2191,22 @@
     }
 
     function productOptionHtml(item) {
-      if (item.name !== "手作編織髮圈") return "";
-      const selected = productOptionSelections[item.id] || hairTieColorOptions[0];
+      const options = productColorOptions[item.name] || [];
+      if (!options.length) return "";
+      const selected = productOptionSelections[item.id] || options[0];
       return `
         <label class="product-option">
           顏色搭配
           <select class="product-option-select" data-id="${escapeAttr(item.id)}">
-            ${hairTieColorOptions.map(option => `<option value="${escapeAttr(option)}" ${option === selected ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
+            ${options.map(option => `<option value="${escapeAttr(option)}" ${option === selected ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
           </select>
         </label>
       `;
     }
 
     function selectedOptionForProduct(item) {
-      if (item.name !== "手作編織髮圈") return "";
-      return productOptionSelections[item.id] || hairTieColorOptions[0];
+      const options = productColorOptions[item.name] || [];
+      return options.length ? (productOptionSelections[item.id] || options[0]) : "";
     }
 
     function renderProductTabs(nextCategory = activeCategory) {
@@ -2329,7 +2340,7 @@
           </div>
           <button class="remove-button" type="button" data-key="${escapeAttr(item.cartKey || item.id)}">移除</button>
           <span>${escapeHtml(item.category)} / ${formatPrice(item.price)} × ${item.qty}</span>
-          ${optionLabel ? `<span class="cart-option">顏色搭配：${escapeHtml(optionLabel)}</span>` : ""}
+          ${optionLabel ? `<span class="cart-option">顏色：${escapeHtml(optionLabel)}</span>` : ""}
         </div>
       `;
       }).join("");
