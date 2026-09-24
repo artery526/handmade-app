@@ -1032,6 +1032,72 @@
       border-radius: 10px;
     }
 
+    .order-success-card {
+      width: min(100%, 520px);
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+      padding: 28px 24px 22px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 18px;
+      background: var(--paper-solid);
+      box-shadow: 0 24px 70px rgba(48, 29, 18, 0.3);
+      color: var(--ink);
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    .order-success-card h2 {
+      margin: 0 0 14px;
+      color: var(--rose);
+      font-family: "Noto Serif TC", serif;
+      font-size: 24px;
+      line-height: 1.45;
+    }
+
+    .order-success-items {
+      margin: 0 0 18px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(246, 228, 210, 0.48);
+      color: #725943;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .order-success-items strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--ink);
+    }
+
+    .order-success-items ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .order-success-message {
+      margin: 0;
+      color: #725943;
+      font-size: 14px;
+      line-height: 1.85;
+    }
+
+    .order-success-message strong {
+      color: var(--ink);
+    }
+
+    .order-success-ok {
+      display: block;
+      width: 100%;
+      min-height: 44px;
+      margin-top: 20px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--rose);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
     .guide-modal-close {
       position: absolute;
       top: 8px;
@@ -1573,7 +1639,7 @@
       <div class="cart-list" id="cartList"></div>
       <div class="cart-footer">
         <div class="cart-total">
-          <span>預估小計</span>
+          <span>總金額</span>
           <span class="cart-total-value" id="cartTotal">NT$0</span>
         </div>
       <form class="cart-form" id="orderForm" novalidate>
@@ -1623,11 +1689,28 @@
           Website
           <input id="websiteField" name="website" type="text" tabindex="-1" autocomplete="off">
         </label>
-        <button class="submit-order" type="submit" id="submitOrder">送出詢問單</button>
+        <button class="submit-order" type="submit" id="submitOrder">送出訂單</button>
       </form>
     </div>
   </aside>
   <div class="toast" id="toast"></div>
+
+  <div class="guide-modal" id="orderSuccessModal" role="dialog" aria-modal="true" aria-labelledby="orderSuccessTitle" aria-hidden="true">
+    <div class="order-success-card">
+      <h2 id="orderSuccessTitle">🎉 已確認收到您的訂單！</h2>
+      <div class="order-success-items" id="orderSuccessItems"></div>
+      <p class="order-success-message">
+        感謝您的訂購與支持 💕<br>
+        📦 <strong>現貨商品預計於 2 天內出貨</strong><br>
+        若因特殊情況需 <strong>超過 3 天以上出貨</strong>，<br>
+        我們將透過 📱 <strong>簡訊</strong> 或 📧 <strong>Email</strong> 另行通知您。<br>
+        🔔 出貨後也請留意相關通知訊息，<br>
+        並記得前往門市取貨唷！✨<br>
+        💗 感謝您的耐心等候與支持，祝您購物愉快！
+      </p>
+      <button class="order-success-ok" type="button" id="closeOrderSuccess">OK</button>
+    </div>
+  </div>
 
   <script>
     const SHEET_ID = "1wYmYKcggwnXcpCMUF--Pl0Hwi70UaQ5OhvM4Ob4yg8w";
@@ -1786,6 +1869,9 @@
     const cartTotal = document.getElementById("cartTotal");
     const purchaseGuideModal = document.getElementById("purchaseGuideModal");
     const closePurchaseGuide = document.getElementById("closePurchaseGuide");
+    const orderSuccessModal = document.getElementById("orderSuccessModal");
+    const orderSuccessItems = document.getElementById("orderSuccessItems");
+    const closeOrderSuccess = document.getElementById("closeOrderSuccess");
     const productLightbox = document.getElementById("productLightbox");
     const closeProductLightbox = document.getElementById("closeProductLightbox");
     const productLightboxImage = document.getElementById("productLightboxImage");
@@ -2451,13 +2537,14 @@
       }
 
       const formData = new URLSearchParams();
+      const submittedItems = buildOrderItemsPayload();
       formData.set("name", name);
       formData.set("email", email);
       formData.set("phone", phone);
       formData.set("pickupStore", selectedPickupStore);
       formData.set("storeName", selectedStoreName);
       formData.set("storeCode", storeCode.value.trim());
-      formData.set("items", JSON.stringify(buildOrderItemsPayload()));
+      formData.set("items", JSON.stringify(submittedItems));
       formData.set("website", websiteField.value.trim());
 
       submitOrder.disabled = true;
@@ -2474,15 +2561,36 @@
         renderCart();
         orderForm.reset();
         createCaptcha();
-        showToast("詢問單已送出");
+        cartDrawer.classList.remove("open");
+        cartDrawer.setAttribute("aria-hidden", "true");
+        showOrderSuccessModal(submittedItems);
       } catch (error) {
         showToast("送出失敗，請稍後再試");
       } finally {
         window.setTimeout(() => {
           submitOrder.disabled = false;
-          submitOrder.textContent = "送出詢問單";
+          submitOrder.textContent = "送出訂單";
         }, 1200);
       }
+    }
+
+    function showOrderSuccessModal(items) {
+      const itemLines = items.map(item => {
+        const code = item.code ? `${escapeHtml(item.code)} ` : "";
+        return `<li>${code}${escapeHtml(item.name)} × ${item.quantity}</li>`;
+      }).join("");
+      orderSuccessItems.innerHTML = `<strong>本次訂單商品</strong><ul>${itemLines}</ul>`;
+      orderSuccessModal.classList.add("open");
+      orderSuccessModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      closeOrderSuccess.focus();
+    }
+
+    function closeOrderSuccessModal() {
+      orderSuccessModal.classList.remove("open");
+      orderSuccessModal.setAttribute("aria-hidden", "true");
+      orderSuccessItems.textContent = "";
+      document.body.style.overflow = "";
     }
 
     function showToast(message) {
@@ -2665,6 +2773,11 @@
       if (event.target === purchaseGuideModal) closePurchaseGuideModal();
     });
 
+    closeOrderSuccess.addEventListener("click", closeOrderSuccessModal);
+    orderSuccessModal.addEventListener("click", event => {
+      if (event.target === orderSuccessModal) closeOrderSuccessModal();
+    });
+
     closeProductLightbox.addEventListener("click", closeProductImageLightbox);
     previousProductImage.addEventListener("click", () => changeProductLightboxImage(-1));
     nextProductImage.addEventListener("click", () => changeProductLightboxImage(1));
@@ -2715,6 +2828,9 @@
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && purchaseGuideModal.classList.contains("open")) {
         closePurchaseGuideModal();
+      }
+      if (event.key === "Escape" && orderSuccessModal.classList.contains("open")) {
+        closeOrderSuccessModal();
       }
     });
 
