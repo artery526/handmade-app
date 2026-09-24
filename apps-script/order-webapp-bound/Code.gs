@@ -1,6 +1,7 @@
 const ORDER_SHEET_NAME = '\u5BA2\u6236\u55AE';
 const ORDER_SPREADSHEET_ID = '1H7rhWYzcl7-VsHpaGTIyaF7LeVlZpOP6ed3Eeub8AOg';
 const ORDER_HEADERS = [
+  '\u8A02\u55AE\u7DE8\u865F',
   '\u4E0B\u55AE\u6642\u9593',
   '\u8CFC\u8CB7\u5546\u54C1\u5305\u542B\u7DE8\u865F',
   '\u4E0B\u55AE\u6578\u91CF',
@@ -27,6 +28,9 @@ function doGet() {
 function doPost(e) {
   try {
     const payload = parseOrderPayload_(e);
+    const orderNumber = isValidOrderNumber_(payload.orderNumber)
+      ? String(payload.orderNumber).trim().toUpperCase()
+      : createOrderNumber_();
     const name = String(payload.name || '').trim();
     const email = String(payload.email || '').trim();
     const phone = String(payload.phone || '').trim();
@@ -79,6 +83,7 @@ function doPost(e) {
       const sheet = getOrderSheet_();
       ensureOrderHeaders_(sheet);
       sheet.appendRow([
+        orderNumber,
         new Date(),
         formatOrderItems_(normalizedItems),
         totalQuantity,
@@ -91,12 +96,12 @@ function doPost(e) {
         '\u5426'
       ]);
       const orderRow = sheet.getLastRow();
-      sheet.getRange(orderRow, 5).setNumberFormat('@').setValue(phone);
+      sheet.getRange(orderRow, 6).setNumberFormat('@').setValue(phone);
     } finally {
       lock.releaseLock();
     }
 
-    return jsonResponse_({ ok: true });
+    return jsonResponse_({ ok: true, orderNumber });
   } catch (error) {
     return jsonResponse_({
       ok: false,
@@ -205,6 +210,16 @@ function getPendingOrderCount_() {
 
   const statuses = sheet.getRange(2, ORDER_HEADERS.length, lastRow - 1, 1).getDisplayValues();
   return statuses.reduce((count, row) => count + (row[0] === '\u662F' ? 0 : 1), 0);
+}
+
+function createOrderNumber_() {
+  const datePart = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyMMdd');
+  const randomPart = Utilities.getUuid().replace(/-/g, '').slice(0, 6).toUpperCase();
+  return `EH${datePart}${randomPart}`;
+}
+
+function isValidOrderNumber_(value) {
+  return /^EH\d{6}[A-Z0-9]{6}$/i.test(String(value || '').trim());
 }
 
 function isValidEmail_(email) {

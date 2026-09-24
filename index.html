@@ -1053,6 +1053,41 @@
       line-height: 1.45;
     }
 
+    .order-success-number {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid rgba(198, 120, 82, 0.28);
+      border-radius: 10px;
+      background: rgba(255, 247, 238, 0.88);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .order-success-number code {
+      color: var(--rose);
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .copy-order-number {
+      min-height: 32px;
+      padding: 4px 11px;
+      border: 1px solid rgba(198, 120, 82, 0.38);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--rose);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     .order-success-items {
       margin: 0 0 18px;
       padding: 12px 14px;
@@ -1697,6 +1732,11 @@
 
   <div class="guide-modal" id="orderSuccessModal" role="dialog" aria-modal="true" aria-labelledby="orderSuccessTitle" aria-hidden="true">
     <div class="order-success-card">
+      <div class="order-success-number">
+        <span>⭐您的訂單編號是：</span>
+        <code id="orderSuccessNumber"></code>
+        <button class="copy-order-number" type="button" id="copyOrderNumber">點擊複製</button>
+      </div>
       <h2 id="orderSuccessTitle">🎉 已確認收到您的訂單！</h2>
       <div class="order-success-items" id="orderSuccessItems"></div>
       <p class="order-success-message">
@@ -1870,8 +1910,10 @@
     const purchaseGuideModal = document.getElementById("purchaseGuideModal");
     const closePurchaseGuide = document.getElementById("closePurchaseGuide");
     const orderSuccessModal = document.getElementById("orderSuccessModal");
+    const orderSuccessNumber = document.getElementById("orderSuccessNumber");
     const orderSuccessItems = document.getElementById("orderSuccessItems");
     const closeOrderSuccess = document.getElementById("closeOrderSuccess");
+    const copyOrderNumber = document.getElementById("copyOrderNumber");
     const productLightbox = document.getElementById("productLightbox");
     const closeProductLightbox = document.getElementById("closeProductLightbox");
     const productLightboxImage = document.getElementById("productLightboxImage");
@@ -2538,6 +2580,8 @@
 
       const formData = new URLSearchParams();
       const submittedItems = buildOrderItemsPayload();
+      const orderNumber = createOrderNumber();
+      formData.set("orderNumber", orderNumber);
       formData.set("name", name);
       formData.set("email", email);
       formData.set("phone", phone);
@@ -2563,7 +2607,7 @@
         createCaptcha();
         cartDrawer.classList.remove("open");
         cartDrawer.setAttribute("aria-hidden", "true");
-        showOrderSuccessModal(submittedItems);
+        showOrderSuccessModal(submittedItems, orderNumber);
       } catch (error) {
         showToast("送出失敗，請稍後再試");
       } finally {
@@ -2574,7 +2618,26 @@
       }
     }
 
-    function showOrderSuccessModal(items) {
+    function createOrderNumber() {
+      const now = new Date();
+      const datePart = [
+        String(now.getFullYear()).slice(-2),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0")
+      ].join("");
+      const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      const values = new Uint32Array(6);
+      if (window.crypto?.getRandomValues) {
+        window.crypto.getRandomValues(values);
+      } else {
+        values.fill(Math.floor(Math.random() * alphabet.length));
+      }
+      const randomPart = Array.from(values, value => alphabet[value % alphabet.length]).join("");
+      return `EH${datePart}${randomPart}`;
+    }
+
+    function showOrderSuccessModal(items, orderNumber) {
+      orderSuccessNumber.textContent = orderNumber;
       const itemLines = items.map(item => {
         const code = item.code ? `${escapeHtml(item.code)} ` : "";
         return `<li>${code}${escapeHtml(item.name)} × ${item.quantity}</li>`;
@@ -2589,6 +2652,7 @@
     function closeOrderSuccessModal() {
       orderSuccessModal.classList.remove("open");
       orderSuccessModal.setAttribute("aria-hidden", "true");
+      orderSuccessNumber.textContent = "";
       orderSuccessItems.textContent = "";
       document.body.style.overflow = "";
     }
@@ -2774,6 +2838,24 @@
     });
 
     closeOrderSuccess.addEventListener("click", closeOrderSuccessModal);
+    copyOrderNumber.addEventListener("click", async () => {
+      const value = orderSuccessNumber.textContent.trim();
+      if (!value) return;
+      try {
+        await navigator.clipboard.writeText(value);
+        copyOrderNumber.textContent = "已複製";
+      } catch (error) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(orderSuccessNumber);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        copyOrderNumber.textContent = "請按 Ctrl+C";
+      }
+      window.setTimeout(() => {
+        copyOrderNumber.textContent = "點擊複製";
+      }, 1600);
+    });
     orderSuccessModal.addEventListener("click", event => {
       if (event.target === orderSuccessModal) closeOrderSuccessModal();
     });
