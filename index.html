@@ -146,6 +146,32 @@
       gap: 8px;
     }
 
+    .line-link {
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(31, 177, 43, 0.32);
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(31, 177, 43, 0.16);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .line-link:hover,
+    .line-link:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(31, 177, 43, 0.24);
+    }
+
+    .line-link img {
+      display: block;
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+    }
+
     .purchase-guide-button {
       width: 190px;
       height: 100px;
@@ -1562,6 +1588,9 @@
         <span class="brand-sub">Handmade with Love</span>
       </a>
       <div class="nav-actions">
+        <a class="line-link" href="https://lin.ee/tIxxtKg" target="_blank" rel="noopener noreferrer" aria-label="加入官方 LINE 好友">
+          <img src="官方LINE.png" alt="">
+        </a>
         <button class="cart-button" type="button" id="openCart">
           🧸購物車 <span class="cart-count" id="cartCount">0</span>
         </button>
