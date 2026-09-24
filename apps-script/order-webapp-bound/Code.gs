@@ -90,6 +90,8 @@ function doPost(e) {
         storeCode,
         '\u5426'
       ]);
+      const orderRow = sheet.getLastRow();
+      sheet.getRange(orderRow, 5).setNumberFormat('@').setValue(phone);
     } finally {
       lock.releaseLock();
     }
