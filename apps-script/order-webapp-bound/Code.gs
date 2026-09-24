@@ -9,7 +9,8 @@ const ORDER_HEADERS = [
   '\u806F\u7D61\u4EBA\u59D3\u540D',
   '\u53D6\u8CA8\u8D85\u5546',
   '\u9580\u5E02\u540D\u7A31',
-  '\u9580\u5E02\u5E97\u865F'
+  '\u9580\u5E02\u5E97\u865F',
+  '\u8A02\u55AE\u662F\u5426\u5DF2\u8655\u7406'
 ];
 const MAX_ORDER_QUANTITY = 20;
 
@@ -86,7 +87,8 @@ function doPost(e) {
         name,
         pickupStore,
         storeName,
-        storeCode
+        storeCode,
+        '\u5426'
       ]);
     } finally {
       lock.releaseLock();
@@ -169,18 +171,38 @@ function ensureOrderHeaders_(sheet) {
   const currentHeaders = sheet.getRange(1, 1, 1, ORDER_HEADERS.length).getValues()[0];
   const needsHeader = ORDER_HEADERS.some((header, index) => currentHeaders[index] !== header);
 
-  if (!needsHeader) {
-    return;
+  if (needsHeader) {
+    sheet.getRange(1, 1, 1, ORDER_HEADERS.length).setValues([ORDER_HEADERS]);
+    sheet.setFrozenRows(1);
   }
 
-  sheet.getRange(1, 1, 1, ORDER_HEADERS.length).setValues([ORDER_HEADERS]);
-  sheet.setFrozenRows(1);
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    const statusRange = sheet.getRange(2, ORDER_HEADERS.length, lastRow - 1, 1);
+    const statuses = statusRange.getValues();
+    let changed = false;
+    statuses.forEach(row => {
+      if (!String(row[0] || '').trim()) {
+        row[0] = '\u5426';
+        changed = true;
+      }
+    });
+    if (changed) {
+      statusRange.setValues(statuses);
+    }
+  }
 }
 
 function getPendingOrderCount_() {
   const sheet = getOrderSheet_();
   ensureOrderHeaders_(sheet);
-  return Math.max(0, sheet.getLastRow() - 1);
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) {
+    return 0;
+  }
+
+  const statuses = sheet.getRange(2, ORDER_HEADERS.length, lastRow - 1, 1).getDisplayValues();
+  return statuses.reduce((count, row) => count + (row[0] === '\u662F' ? 0 : 1), 0);
 }
 
 function isValidEmail_(email) {
