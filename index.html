@@ -1198,6 +1198,7 @@
     .cart-total {
       display: flex;
       justify-content: space-between;
+      gap: 12px;
       margin-bottom: 12px;
       font-family: "Noto Sans TC", sans-serif;
       font-weight: 700;
@@ -1229,6 +1230,30 @@
       font: inherit;
       padding: 9px 11px;
       outline: none;
+    }
+
+    select.cart-input {
+      appearance: auto;
+    }
+
+    .cart-field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .cod-fee {
+      color: #c53f43;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .cart-total-value {
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 5px;
+      text-align: right;
     }
 
     .cart-input:focus {
@@ -1334,6 +1359,10 @@
     }
 
     @media (max-width: 640px) {
+      .cart-field-row {
+        grid-template-columns: 1fr;
+      }
+
       .nav {
         width: min(100% - 24px, 1120px);
         height: 62px;
@@ -1514,7 +1543,7 @@
     <div class="guide-modal-card">
       <h2 id="purchaseGuideTitle" class="sr-only">購買流程</h2>
       <button class="guide-modal-close" type="button" id="closePurchaseGuide" aria-label="關閉購買流程">×</button>
-      <img class="guide-modal-image" src="process.png" alt="Emily 手作工坊購買流程圖" loading="lazy">
+      <img class="guide-modal-image" src="process v1.png" alt="Emily 手作工坊購買流程圖" loading="lazy">
     </div>
   </div>
 
@@ -1541,21 +1570,47 @@
       <h2>🧸購物車</h2>
       <button class="icon-button" type="button" id="closeCart" aria-label="關閉購物車">×</button>
     </div>
-    <div class="cart-list" id="cartList"></div>
-    <div class="cart-footer">
-      <div class="cart-total">
-        <span>預估小計</span>
-        <span id="cartTotal">NT$0</span>
-      </div>
+      <div class="cart-list" id="cartList"></div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>預估小計</span>
+          <span class="cart-total-value" id="cartTotal">NT$0</span>
+        </div>
       <form class="cart-form" id="orderForm" novalidate>
-        <label class="cart-field" for="buyerEmail">
-          電子郵件信箱
-          <input class="cart-input" id="buyerEmail" name="email" type="email" autocomplete="email" placeholder="請輸入聯絡電子郵件信箱" required>
-        </label>
-        <label class="cart-field" for="buyerPhone">
-          聯絡電話
-          <input class="cart-input" id="buyerPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="請輸入聯絡電話" required>
-        </label>
+        <div class="cart-field-row">
+          <label class="cart-field" for="buyerName">
+            聯絡人姓名
+            <input class="cart-input" id="buyerName" name="name" type="text" autocomplete="name" placeholder="請輸入聯絡人姓名" required>
+          </label>
+          <label class="cart-field" for="buyerPhone">
+            電話
+            <input class="cart-input" id="buyerPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="請輸入聯絡電話" required>
+          </label>
+        </div>
+        <div class="cart-field-row">
+          <label class="cart-field" for="pickupStore">
+            取貨超商
+            <select class="cart-input" id="pickupStore" name="pickupStore" required>
+              <option value="">請選擇超商</option>
+              <option value="全家">全家</option>
+              <option value="7-11">7-11</option>
+            </select>
+          </label>
+          <label class="cart-field" for="storeName">
+            門市名稱
+            <input class="cart-input" id="storeName" name="storeName" type="text" autocomplete="off" placeholder="請輸入門市名稱" required>
+          </label>
+        </div>
+        <div class="cart-field-row">
+          <label class="cart-field" for="storeCode">
+            門市店號（建議選填）
+            <input class="cart-input" id="storeCode" name="storeCode" type="text" inputmode="numeric" autocomplete="off" placeholder="可填門市店號">
+          </label>
+          <label class="cart-field" for="buyerEmail">
+            電子郵件信箱
+            <input class="cart-input" id="buyerEmail" name="email" type="email" autocomplete="email" placeholder="請輸入聯絡電子郵件信箱" required>
+          </label>
+        </div>
         <label class="cart-field" for="captchaAnswer">
           驗證碼
           <span class="captcha-row">
@@ -1578,6 +1633,7 @@
     const SHEET_ID = "1wYmYKcggwnXcpCMUF--Pl0Hwi70UaQ5OhvM4Ob4yg8w";
     const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
     const ORDER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbznfe1QNkopwYdjHJJPHmKdqHovAblVYnm1lajTwpi87aLC1erVkxuyYv9kX-akli6W8w/exec";
+    const CASH_ON_DELIVERY_FEE = 65;
 
     const sampleProducts = [
       {
@@ -1719,8 +1775,12 @@
     const resetProductImage = document.getElementById("resetProductImage");
     const zoomInProductImage = document.getElementById("zoomInProductImage");
     const orderForm = document.getElementById("orderForm");
+    const buyerName = document.getElementById("buyerName");
     const buyerEmail = document.getElementById("buyerEmail");
     const buyerPhone = document.getElementById("buyerPhone");
+    const pickupStore = document.getElementById("pickupStore");
+    const storeName = document.getElementById("storeName");
+    const storeCode = document.getElementById("storeCode");
     const captchaQuestion = document.getElementById("captchaQuestion");
     const captchaAnswer = document.getElementById("captchaAnswer");
     const websiteField = document.getElementById("websiteField");
@@ -2246,9 +2306,12 @@
 
     function renderCart() {
       const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const total = subtotal + (cart.length ? CASH_ON_DELIVERY_FEE : 0);
       cartCount.textContent = totalQty;
-      cartTotal.textContent = formatPrice(total);
+      cartTotal.innerHTML = cart.length
+        ? `${formatPrice(subtotal)} <span class="cod-fee">+${CASH_ON_DELIVERY_FEE}</span> <span>=</span> ${formatPrice(total)}`
+        : formatPrice(0);
 
       if (!cart.length) {
         cartList.innerHTML = '<div class="empty">先把喜歡的作品加入購物車。</div>';
@@ -2306,6 +2369,10 @@
       }));
     }
 
+    function isValidPickupStore(value) {
+      return ["全家", "7-11"].includes(String(value || "").trim());
+    }
+
     async function submitOrderForm(event) {
       event.preventDefault();
 
@@ -2314,10 +2381,10 @@
         return;
       }
 
-      const email = buyerEmail.value.trim();
-      if (!isValidEmail(email)) {
-        showToast("請填寫正確的 Email");
-        buyerEmail.focus();
+      const name = buyerName.value.trim();
+      if (!name) {
+        showToast("請填寫聯絡人姓名");
+        buyerName.focus();
         return;
       }
 
@@ -2325,6 +2392,27 @@
       if (!isValidPhone(phone)) {
         showToast("請填寫正確的聯絡電話");
         buyerPhone.focus();
+        return;
+      }
+
+      const selectedPickupStore = pickupStore.value.trim();
+      if (!isValidPickupStore(selectedPickupStore)) {
+        showToast("請選擇取貨超商");
+        pickupStore.focus();
+        return;
+      }
+
+      const selectedStoreName = storeName.value.trim();
+      if (!selectedStoreName) {
+        showToast("請填寫門市名稱");
+        storeName.focus();
+        return;
+      }
+
+      const email = buyerEmail.value.trim();
+      if (!isValidEmail(email)) {
+        showToast("請填寫正確的 Email");
+        buyerEmail.focus();
         return;
       }
 
@@ -2341,8 +2429,12 @@
       }
 
       const formData = new URLSearchParams();
+      formData.set("name", name);
       formData.set("email", email);
       formData.set("phone", phone);
+      formData.set("pickupStore", selectedPickupStore);
+      formData.set("storeName", selectedStoreName);
+      formData.set("storeCode", storeCode.value.trim());
       formData.set("items", JSON.stringify(buildOrderItemsPayload()));
       formData.set("website", websiteField.value.trim());
 

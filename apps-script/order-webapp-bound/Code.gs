@@ -5,7 +5,11 @@ const ORDER_HEADERS = [
   '\u8CFC\u8CB7\u5546\u54C1\u5305\u542B\u7DE8\u865F',
   '\u4E0B\u55AE\u6578\u91CF',
   '\u96FB\u5B50\u90F5\u4EF6\u4FE1\u7BB1',
-  '\u806F\u7D61\u96FB\u8A71'
+  '\u806F\u7D61\u96FB\u8A71',
+  '\u806F\u7D61\u4EBA\u59D3\u540D',
+  '\u53D6\u8CA8\u8D85\u5546',
+  '\u9580\u5E02\u540D\u7A31',
+  '\u9580\u5E02\u5E97\u865F'
 ];
 const MAX_ORDER_QUANTITY = 20;
 
@@ -22,9 +26,17 @@ function doGet() {
 function doPost(e) {
   try {
     const payload = parseOrderPayload_(e);
+    const name = String(payload.name || '').trim();
     const email = String(payload.email || '').trim();
     const phone = String(payload.phone || '').trim();
+    const pickupStore = String(payload.pickupStore || '').trim();
+    const storeName = String(payload.storeName || '').trim();
+    const storeCode = String(payload.storeCode || '').trim();
     const items = parseItems_(payload.items);
+
+    if (!name) {
+      return jsonResponse_({ ok: false, error: 'Name is required.' });
+    }
 
     if (!isValidEmail_(email)) {
       return jsonResponse_({ ok: false, error: 'Invalid email.' });
@@ -32,6 +44,14 @@ function doPost(e) {
 
     if (!isValidPhone_(phone)) {
       return jsonResponse_({ ok: false, error: 'Invalid phone.' });
+    }
+
+    if (!['全家', '7-11'].includes(pickupStore)) {
+      return jsonResponse_({ ok: false, error: 'Invalid pickup store.' });
+    }
+
+    if (!storeName) {
+      return jsonResponse_({ ok: false, error: 'Store name is required.' });
     }
 
     if (String(payload.website || '').trim()) {
@@ -62,7 +82,11 @@ function doPost(e) {
         formatOrderItems_(normalizedItems),
         totalQuantity,
         email,
-        phone
+        phone,
+        name,
+        pickupStore,
+        storeName,
+        storeCode
       ]);
     } finally {
       lock.releaseLock();
