@@ -171,6 +171,45 @@
       object-fit: contain;
     }
 
+    .short-video-jump {
+      display: block;
+      width: min(640px, calc(100% - 32px));
+      aspect-ratio: 3 / 1;
+      margin: 8px auto 14px;
+      overflow: hidden;
+      border-radius: 18px;
+      outline-offset: 4px;
+    }
+
+    .short-video-jump img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .short-video-jump img + img {
+      display: none;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .short-video-jump img + img {
+        display: block;
+        position: absolute;
+        inset: 0;
+        animation: short-video-button-swap 1.2s steps(1, end) infinite;
+      }
+
+      .short-video-jump {
+        position: relative;
+      }
+    }
+
+    @keyframes short-video-button-swap {
+      0%, 49.99% { opacity: 0; }
+      50%, 100% { opacity: 1; }
+    }
+
     .purchase-guide-button {
       width: 190px;
       height: 100px;
@@ -462,6 +501,7 @@
 
     .short-video-section {
       overflow: hidden;
+      scroll-margin-top: 84px;
     }
 
     .short-video-track {
@@ -1720,6 +1760,11 @@
     </nav>
   </header>
 
+  <a class="short-video-jump" href="#shortVideos" aria-label="點我觀看精選手作短影片">
+    <img src="assets/short-video-button-1.webp" alt="點我觀看精選手作短影片" width="1000" height="333" fetchpriority="high" decoding="async">
+    <img src="assets/short-video-button-2.webp" alt="" aria-hidden="true" width="1000" height="333" decoding="async">
+  </a>
+
   <section class="hero" id="top" aria-label="Emily 手作工坊主視覺">
     <picture>
       <source srcset="assets/emily-hero-wide.webp" type="image/webp">
@@ -1771,6 +1816,25 @@
       <div class="popular-grid" id="popularGrid"></div>
     </section>
 
+    <section class="section" id="story">
+      <div class="story-panel">
+        <div class="story-copy">
+          <p>每一針、每一線，都是用心慢慢編織而成。希望收到作品的人，能感受到手作的溫度，在忙碌的生活中，擁有片刻的療癒與美好。</p>
+          <div class="story-values">
+            <span>純手工製作</span>
+            <span>嚴選優質材料</span>
+            <span>用心包裝出貨</span>
+            <span>客製化服務</span>
+          </div>
+          <div class="order-watermark" id="orderWatermark" aria-live="polite"></div>
+        </div>
+        <picture>
+          <source srcset="Downsize.webp" type="image/webp">
+          <img class="story-image" src="Downsize.png" alt="Emily 手作工坊作品展示" loading="lazy" decoding="async">
+        </picture>
+      </div>
+    </section>
+
     <section class="section short-video-section" id="shortVideos">
       <div class="section-head section-head-centered">
         <div class="section-title">
@@ -1788,25 +1852,6 @@
             <a href="https://www.tiktok.com/@emilywu0188/video/7688003873897745685" target="_blank" rel="noopener noreferrer">前往 TikTok</a>
           </div>
         </article>
-      </div>
-    </section>
-
-    <section class="section" id="story">
-      <div class="story-panel">
-        <div class="story-copy">
-          <p>每一針、每一線，都是用心慢慢編織而成。希望收到作品的人，能感受到手作的溫度，在忙碌的生活中，擁有片刻的療癒與美好。</p>
-          <div class="story-values">
-            <span>純手工製作</span>
-            <span>嚴選優質材料</span>
-            <span>用心包裝出貨</span>
-            <span>客製化服務</span>
-          </div>
-          <div class="order-watermark" id="orderWatermark" aria-live="polite"></div>
-        </div>
-        <picture>
-          <source srcset="Downsize.webp" type="image/webp">
-          <img class="story-image" src="Downsize.png" alt="Emily 手作工坊作品展示" loading="lazy" decoding="async">
-        </picture>
       </div>
     </section>
   </main>
