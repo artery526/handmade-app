@@ -460,6 +460,109 @@
       text-align: left;
     }
 
+    .short-video-section {
+      overflow: hidden;
+    }
+
+    .short-video-track {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      padding: 4px 4px 14px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+    }
+
+    .short-video-card {
+      flex: 0 0 min(330px, 78vw);
+      scroll-snap-align: start;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 14px 36px rgba(109, 77, 53, 0.1);
+      overflow: hidden;
+    }
+
+    .short-video-frame {
+      position: relative;
+      aspect-ratio: 9 / 16;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #f4b7a7, #8ca893 52%, #6c596b);
+      overflow: hidden;
+    }
+
+    .short-video-frame::before {
+      content: "Emily 手作短影片";
+      position: absolute;
+      inset: 18px 16px auto;
+      color: rgba(255, 255, 255, 0.88);
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-align: center;
+    }
+
+    .short-video-frame.is-loaded::before {
+      display: none;
+    }
+
+    .short-video-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    .short-video-play {
+      position: relative;
+      z-index: 1;
+      width: 72px;
+      height: 72px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--rose);
+      font-size: 30px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(67, 48, 42, 0.24);
+      transition: transform 0.2s ease;
+    }
+
+    .short-video-play:hover,
+    .short-video-play:focus-visible {
+      transform: scale(1.06);
+    }
+
+    .short-video-frame.is-loaded .short-video-play {
+      display: none;
+    }
+
+    .short-video-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px 16px;
+    }
+
+    .short-video-meta strong {
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .short-video-meta a {
+      flex: 0 0 auto;
+      color: var(--rose);
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
     .popular-gallery-wrap {
       position: relative;
     }
@@ -1479,6 +1582,10 @@
         grid-template-columns: 1fr;
       }
 
+      .short-video-card {
+        flex-basis: min(330px, 84vw);
+      }
+
       .story-values {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -1662,6 +1769,26 @@
         </div>
       </div>
       <div class="popular-grid" id="popularGrid"></div>
+    </section>
+
+    <section class="section short-video-section" id="shortVideos">
+      <div class="section-head section-head-centered">
+        <div class="section-title">
+          <h2>精選手作短影片</h2>
+          <p>點擊播放，看看 Emily 的手作日常</p>
+        </div>
+      </div>
+      <div class="short-video-track" aria-label="精選手作短影片">
+        <article class="short-video-card">
+          <div class="short-video-frame" data-tiktok-video="7688003873897745685">
+            <button class="short-video-play" type="button" aria-label="播放 TikTok 手作短影片">▶</button>
+          </div>
+          <div class="short-video-meta">
+            <strong>手作編織日常</strong>
+            <a href="https://www.tiktok.com/@emilywu0188/video/7688003873897745685" target="_blank" rel="noopener noreferrer">前往 TikTok</a>
+          </div>
+        </article>
+      </div>
     </section>
 
     <section class="section" id="story">
@@ -2962,6 +3089,23 @@
 
     document.getElementById("refreshCaptcha").addEventListener("click", createCaptcha);
     orderForm.addEventListener("submit", submitOrderForm);
+
+    document.querySelectorAll(".short-video-play").forEach(button => {
+      button.addEventListener("click", () => {
+        const frame = button.closest(".short-video-frame");
+        const videoId = frame?.dataset.tiktokVideo;
+        if (!frame || !videoId || frame.classList.contains("is-loaded")) return;
+
+        const iframe = document.createElement("iframe");
+        iframe.src = `https://www.tiktok.com/player/v1/${videoId}?description=1&music_info=1&rel=0`;
+        iframe.title = "TikTok 手作短影片播放器";
+        iframe.loading = "lazy";
+        iframe.allow = "fullscreen; autoplay";
+        iframe.allowFullscreen = true;
+        frame.replaceChildren(iframe);
+        frame.classList.add("is-loaded");
+      });
+    });
     createCaptcha();
     renderCart();
     renderCategories();
