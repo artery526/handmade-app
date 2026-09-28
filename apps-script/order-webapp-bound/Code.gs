@@ -14,6 +14,7 @@ const ORDER_HEADERS = [
   '\u8A02\u55AE\u662F\u5426\u5DF2\u8655\u7406'
 ];
 const MAX_ORDER_QUANTITY = 20;
+const ORDER_STATUSES = ['已接單', '待處理', '包貨中', '已出貨', '已結單'];
 
 function doGet(e) {
   const action = String(e && e.parameter && e.parameter.action || '').trim().toLowerCase();
@@ -58,7 +59,7 @@ function lookupOrder_(parameters) {
     if ((lookupByOrderNumber && rowOrderNumber === orderNumber) || (lookupByPhone && rowPhone === phone)) {
       matches.push({
         orderNumber: rowOrderNumber,
-        status: statuses[index][0] === '是' ? '已處理' : '待處理'
+        status: normalizeOrderStatus_(statuses[index][0])
       });
     }
   }
@@ -144,7 +145,7 @@ function doPost(e) {
         pickupStore,
         storeName,
         storeCode,
-        '\u5426'
+        '已接單'
       ]);
       const orderRow = sheet.getLastRow();
       sheet.getRange(orderRow, 6).setNumberFormat('@').setValue(phone);
@@ -235,13 +236,21 @@ function ensureOrderHeaders_(sheet) {
   }
 
   const lastRow = sheet.getLastRow();
+  const migrationValidation = SpreadsheetApp.newDataValidation()
+    .requireValueInList(ORDER_STATUSES.concat(['否', '是', '已處理', '待確認']), true)
+    .setAllowInvalid(false)
+    .build();
+  const statusColumnRange = sheet.getRange(2, ORDER_HEADERS.length, Math.max(1, sheet.getMaxRows() - 1), 1);
+  statusColumnRange.setDataValidation(migrationValidation);
+
   if (lastRow > 1) {
     const statusRange = sheet.getRange(2, ORDER_HEADERS.length, lastRow - 1, 1);
     const statuses = statusRange.getValues();
     let changed = false;
     statuses.forEach(row => {
-      if (!String(row[0] || '').trim()) {
-        row[0] = '\u5426';
+      const normalized = normalizeOrderStatus_(row[0]);
+      if (row[0] !== normalized) {
+        row[0] = normalized;
         changed = true;
       }
     });
@@ -249,6 +258,20 @@ function ensureOrderHeaders_(sheet) {
       statusRange.setValues(statuses);
     }
   }
+
+  const validation = SpreadsheetApp.newDataValidation()
+    .requireValueInList(ORDER_STATUSES, true)
+    .setAllowInvalid(false)
+    .build();
+  statusColumnRange.setDataValidation(validation);
+}
+
+function normalizeOrderStatus_(value) {
+  const status = String(value || '').trim();
+  if (status === '否') return '待處理';
+  if (status === '待確認') return '待處理';
+  if (status === '是' || status === '已處理') return '已結單';
+  return ORDER_STATUSES.includes(status) ? status : '已接單';
 }
 
 function getPendingOrderCount_() {
@@ -260,7 +283,7 @@ function getPendingOrderCount_() {
   }
 
   const statuses = sheet.getRange(2, ORDER_HEADERS.length, lastRow - 1, 1).getDisplayValues();
-  return statuses.reduce((count, row) => count + (row[0] === '\u662F' ? 0 : 1), 0);
+  return statuses.reduce((count, row) => count + (normalizeOrderStatus_(row[0]) === '已結單' ? 0 : 1), 0);
 }
 
 function createOrderNumber_() {
