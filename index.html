@@ -371,6 +371,7 @@
       min-height: 1.5em;
       margin: 2px 0 0;
       color: var(--ink);
+      white-space: pre-line;
       text-align: center;
     }
 
@@ -1967,13 +1968,11 @@
       <button class="guide-modal-close" type="button" id="closeOrderLookup" aria-label="關閉查詢訂單">×</button>
       <div class="section-title">
         <h2 id="orderLookupTitle">查詢訂單進度</h2>
-        <p>請輸入訂單編號與下單時填寫的聯絡電話</p>
+        <p>請輸入訂單編號或下單時填寫的手機號碼</p>
       </div>
       <form class="order-lookup-form" id="orderLookupForm" novalidate>
-        <label for="lookupOrderNumber">訂單編號</label>
-        <input class="cart-input" id="lookupOrderNumber" name="orderNumber" type="text" maxlength="14" autocomplete="off" placeholder="例如 EH260928ABC234" required>
-        <label for="lookupPhone">聯絡電話</label>
-        <input class="cart-input" id="lookupPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="請輸入下單電話" required>
+        <label for="lookupIdentifier">訂單編號或手機號碼</label>
+        <input class="cart-input" id="lookupIdentifier" name="identifier" type="text" maxlength="20" autocomplete="off" inputmode="text" placeholder="例如 EH260928ABC234 或 09xxxxxxxx" required>
         <button class="submit-order" type="submit" id="lookupOrderSubmit">查詢進度</button>
         <p id="orderLookupResult" role="status" aria-live="polite"></p>
       </form>
@@ -2090,8 +2089,7 @@
     const ORDER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbznfe1QNkopwYdjHJJPHmKdqHovAblVYnm1lajTwpi87aLC1erVkxuyYv9kX-akli6W8w/exec";
     const CASH_ON_DELIVERY_FEE = 65;
     const orderLookupForm = document.getElementById("orderLookupForm");
-    const lookupOrderNumber = document.getElementById("lookupOrderNumber");
-    const lookupPhone = document.getElementById("lookupPhone");
+    const lookupIdentifier = document.getElementById("lookupIdentifier");
     const lookupOrderSubmit = document.getElementById("lookupOrderSubmit");
     const orderLookupResult = document.getElementById("orderLookupResult");
     const orderLookupModal = document.getElementById("orderLookupModal");
@@ -2455,11 +2453,10 @@
 
     orderLookupForm.addEventListener("submit", async event => {
       event.preventDefault();
-      const orderNumber = lookupOrderNumber.value.trim().toUpperCase();
-      const phone = lookupPhone.value.trim();
+      const identifier = lookupIdentifier.value.trim();
       orderLookupResult.textContent = "";
-      if (!/^EH\d{6}[A-Z0-9]{6}$/.test(orderNumber) || !isValidPhone(phone)) {
-        orderLookupResult.textContent = "請確認訂單編號格式與聯絡電話。";
+      if (!/^EH\d{6}[A-Z0-9]{6}$/i.test(identifier) && !isValidPhone(identifier)) {
+        orderLookupResult.textContent = "請輸入正確的訂單編號或手機號碼。";
         return;
       }
 
@@ -2467,12 +2464,16 @@
       lookupOrderSubmit.textContent = "查詢中...";
       orderLookupResult.textContent = "正在查詢訂單...";
       try {
-        const params = new URLSearchParams({ action: "lookupOrder", orderNumber, phone, t: String(Date.now()) });
+        const params = new URLSearchParams({ action: "lookupOrder", identifier, t: String(Date.now()) });
         const response = await fetch(`${ORDER_WEBAPP_URL}?${params}`, { cache: "no-store" });
         const data = await response.json();
-        orderLookupResult.textContent = data.ok
-          ? `訂單編號：${data.orderNumber}｜目前進度：${data.status}`
-          : (data.error || "查詢失敗，請稍後再試。");
+        if (data.ok && Array.isArray(data.orders)) {
+          orderLookupResult.textContent = data.orders.map(order =>
+            `訂單編號：${order.orderNumber}｜目前進度：${order.status}`
+          ).join("\n");
+        } else {
+          orderLookupResult.textContent = data.error || "查詢失敗，請稍後再試。";
+        }
       } catch (error) {
         orderLookupResult.textContent = "目前無法查詢，請稍後再試。";
       } finally {
@@ -3202,7 +3203,7 @@
       orderLookupModal.classList.add("open");
       orderLookupModal.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
-      lookupOrderNumber.focus();
+      lookupIdentifier.focus();
     });
 
     closeOrderLookup.addEventListener("click", closeOrderLookupModal);

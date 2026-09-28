@@ -31,40 +31,44 @@ function doGet(e) {
 }
 
 function lookupOrder_(parameters) {
-  const orderNumber = String(parameters.orderNumber || '').trim().toUpperCase();
-  const phone = normalizePhone_(parameters.phone);
-  if (!isValidOrderNumber_(orderNumber) || !isValidPhone_(String(parameters.phone || '').trim())) {
-    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號與電話。' });
+  const identifier = String(parameters.identifier || parameters.orderNumber || parameters.phone || '').trim();
+  const orderNumber = identifier.toUpperCase();
+  const phone = normalizePhone_(identifier);
+  const lookupByOrderNumber = isValidOrderNumber_(orderNumber);
+  const lookupByPhone = !lookupByOrderNumber && isValidPhone_(identifier);
+  if (!lookupByOrderNumber && !lookupByPhone) {
+    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號或手機號碼。' });
   }
 
   const sheet = getOrderSheet_();
   ensureOrderHeaders_(sheet);
   const lastRow = sheet.getLastRow();
   if (lastRow <= 1) {
-    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號與電話。' });
+    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號或手機號碼。' });
   }
 
   // Read only order number, phone, and status; other customer details stay untouched.
   const orderNumbers = sheet.getRange(2, 1, lastRow - 1, 1).getDisplayValues();
   const phones = sheet.getRange(2, 6, lastRow - 1, 1).getDisplayValues();
   const statuses = sheet.getRange(2, 11, lastRow - 1, 1).getDisplayValues();
-  let found = false;
-  let matchedStatus = '';
+  const matches = [];
   for (let index = 0; index < orderNumbers.length; index += 1) {
-    if (String(orderNumbers[index][0] || '').trim().toUpperCase() === orderNumber && normalizePhone_(phones[index][0]) === phone) {
-      found = true;
-      matchedStatus = statuses[index][0];
-      break;
+    const rowOrderNumber = String(orderNumbers[index][0] || '').trim().toUpperCase();
+    const rowPhone = normalizePhone_(phones[index][0]);
+    if ((lookupByOrderNumber && rowOrderNumber === orderNumber) || (lookupByPhone && rowPhone === phone)) {
+      matches.push({
+        orderNumber: rowOrderNumber,
+        status: statuses[index][0] === '是' ? '已處理' : '待處理'
+      });
     }
   }
-  if (!found) {
-    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號與電話。' });
+  if (!matches.length) {
+    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號或手機號碼。' });
   }
 
   return jsonResponse_({
     ok: true,
-    orderNumber,
-    status: matchedStatus === '是' ? '已處理' : '待處理'
+    orders: matches
   });
 }
 
