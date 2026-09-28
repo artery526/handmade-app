@@ -15,7 +15,12 @@ const ORDER_HEADERS = [
 ];
 const MAX_ORDER_QUANTITY = 20;
 
-function doGet() {
+function doGet(e) {
+  const action = String(e && e.parameter && e.parameter.action || '').trim().toLowerCase();
+  if (action === 'lookuporder') {
+    return lookupOrder_(e.parameter);
+  }
+
   const pendingOrderCount = getPendingOrderCount_();
   return jsonResponse_({
     ok: true,
@@ -23,6 +28,48 @@ function doGet() {
     orderCount: pendingOrderCount,
     pendingOrderCount
   });
+}
+
+function lookupOrder_(parameters) {
+  const orderNumber = String(parameters.orderNumber || '').trim().toUpperCase();
+  const phone = normalizePhone_(parameters.phone);
+  if (!isValidOrderNumber_(orderNumber) || !isValidPhone_(String(parameters.phone || '').trim())) {
+    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號與電話。' });
+  }
+
+  const sheet = getOrderSheet_();
+  ensureOrderHeaders_(sheet);
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) {
+    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號與電話。' });
+  }
+
+  // Read only order number, phone, and status; other customer details stay untouched.
+  const orderNumbers = sheet.getRange(2, 1, lastRow - 1, 1).getDisplayValues();
+  const phones = sheet.getRange(2, 6, lastRow - 1, 1).getDisplayValues();
+  const statuses = sheet.getRange(2, 11, lastRow - 1, 1).getDisplayValues();
+  let found = false;
+  let matchedStatus = '';
+  for (let index = 0; index < orderNumbers.length; index += 1) {
+    if (String(orderNumbers[index][0] || '').trim().toUpperCase() === orderNumber && normalizePhone_(phones[index][0]) === phone) {
+      found = true;
+      matchedStatus = statuses[index][0];
+      break;
+    }
+  }
+  if (!found) {
+    return jsonResponse_({ ok: false, error: '查無符合資料，請確認訂單編號與電話。' });
+  }
+
+  return jsonResponse_({
+    ok: true,
+    orderNumber,
+    status: matchedStatus === '是' ? '已處理' : '待處理'
+  });
+}
+
+function normalizePhone_(phone) {
+  return String(phone || '').replace(/[^0-9]/g, '');
 }
 
 function doPost(e) {

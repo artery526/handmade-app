@@ -318,6 +318,26 @@
       text-align: center;
     }
 
+    .order-lookup-form {
+      display: grid;
+      gap: 9px;
+      width: min(420px, 100%);
+      margin: 18px auto 0;
+      text-align: left;
+    }
+
+    .order-lookup-form label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    #orderLookupResult {
+      min-height: 1.5em;
+      margin: 2px 0 0;
+      color: var(--ink);
+      text-align: center;
+    }
+
     .section-head {
       display: flex;
       align-items: end;
@@ -1770,6 +1790,21 @@
     <img src="assets/short-video-button-2.webp" alt="" aria-hidden="true" width="1000" height="333" decoding="async">
   </a>
 
+  <section class="section section-centered" id="orderLookup" aria-labelledby="orderLookupTitle">
+    <div class="section-title">
+      <h2 id="orderLookupTitle">查詢訂單進度</h2>
+      <p>請輸入訂單編號與下單時填寫的聯絡電話</p>
+    </div>
+    <form class="order-lookup-form" id="orderLookupForm" novalidate>
+      <label for="lookupOrderNumber">訂單編號</label>
+      <input class="cart-input" id="lookupOrderNumber" name="orderNumber" type="text" maxlength="14" autocomplete="off" placeholder="例如 EH260928ABC234" required>
+      <label for="lookupPhone">聯絡電話</label>
+      <input class="cart-input" id="lookupPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="請輸入下單電話" required>
+      <button class="submit-order" type="submit" id="lookupOrderSubmit">查詢進度</button>
+      <p id="orderLookupResult" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
   <section class="hero" id="top" aria-label="Emily 手作工坊主視覺">
     <picture>
       <source srcset="assets/emily-hero-wide.webp" type="image/webp">
@@ -1978,6 +2013,11 @@
     const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
     const ORDER_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbznfe1QNkopwYdjHJJPHmKdqHovAblVYnm1lajTwpi87aLC1erVkxuyYv9kX-akli6W8w/exec";
     const CASH_ON_DELIVERY_FEE = 65;
+    const orderLookupForm = document.getElementById("orderLookupForm");
+    const lookupOrderNumber = document.getElementById("lookupOrderNumber");
+    const lookupPhone = document.getElementById("lookupPhone");
+    const lookupOrderSubmit = document.getElementById("lookupOrderSubmit");
+    const orderLookupResult = document.getElementById("orderLookupResult");
 
     const sampleProducts = [
       {
@@ -2334,6 +2374,34 @@
         orderWatermark.textContent = "";
       }
     }
+
+    orderLookupForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const orderNumber = lookupOrderNumber.value.trim().toUpperCase();
+      const phone = lookupPhone.value.trim();
+      orderLookupResult.textContent = "";
+      if (!/^EH\d{6}[A-Z0-9]{6}$/.test(orderNumber) || !isValidPhone(phone)) {
+        orderLookupResult.textContent = "請確認訂單編號格式與聯絡電話。";
+        return;
+      }
+
+      lookupOrderSubmit.disabled = true;
+      lookupOrderSubmit.textContent = "查詢中...";
+      orderLookupResult.textContent = "正在查詢訂單...";
+      try {
+        const params = new URLSearchParams({ action: "lookupOrder", orderNumber, phone, t: String(Date.now()) });
+        const response = await fetch(`${ORDER_WEBAPP_URL}?${params}`, { cache: "no-store" });
+        const data = await response.json();
+        orderLookupResult.textContent = data.ok
+          ? `訂單編號：${data.orderNumber}｜目前進度：${data.status}`
+          : (data.error || "查詢失敗，請稍後再試。");
+      } catch (error) {
+        orderLookupResult.textContent = "目前無法查詢，請稍後再試。";
+      } finally {
+        lookupOrderSubmit.disabled = false;
+        lookupOrderSubmit.textContent = "查詢進度";
+      }
+    });
 
     function renderCategories() {
       categoryGrid.innerHTML = categoryCards.map(card => `
