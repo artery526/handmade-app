@@ -181,6 +181,25 @@
       outline-offset: 4px;
     }
 
+    .order-lookup-jump {
+      display: block;
+      width: min(380px, calc(100% - 32px));
+      margin: 14px auto 4px;
+      line-height: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .order-lookup-jump:hover,
+    .order-lookup-jump:focus-visible {
+      transform: translateY(-2px);
+    }
+
+    .order-lookup-jump img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
     .short-video-jump img {
       display: block;
       width: 100%;
@@ -1788,6 +1807,10 @@
   <a class="short-video-jump" href="#shortVideos" aria-label="點我觀看精選手作短影片">
     <img src="assets/short-video-button-1.webp" alt="點我觀看精選手作短影片" width="1000" height="333" fetchpriority="high" decoding="async">
     <img src="assets/short-video-button-2.webp" alt="" aria-hidden="true" width="1000" height="333" decoding="async">
+  </a>
+
+  <a class="order-lookup-jump" href="#orderLookup" aria-label="查詢訂單進度">
+    <img src="assets/order-lookup-button.webp" alt="查詢訂單進度" width="760" height="376" decoding="async">
   </a>
 
   <section class="section section-centered" id="orderLookup" aria-labelledby="orderLookupTitle">
