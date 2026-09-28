@@ -183,8 +183,15 @@
 
     .order-lookup-jump {
       display: block;
-      width: min(380px, calc(100% - 32px));
-      margin: 14px auto 4px;
+      width: min(190px, calc(100% - 32px));
+      aspect-ratio: 3 / 1;
+      margin: 8px 0 14px max(16px, calc((100% - 1120px) / 2 + 16px));
+      overflow: hidden;
+      border-radius: 18px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
       line-height: 0;
       transition: transform 0.2s ease;
     }
@@ -197,7 +204,8 @@
     .order-lookup-jump img {
       display: block;
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: contain;
     }
 
     .short-video-jump img {
@@ -1252,6 +1260,26 @@
       font-family: "Noto Sans TC", sans-serif;
     }
 
+    .order-lookup-card {
+      position: relative;
+      width: min(100%, 420px);
+      padding: 30px 24px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 18px;
+      background: var(--paper-solid);
+      box-shadow: 0 24px 70px rgba(48, 29, 18, 0.3);
+      color: var(--ink);
+    }
+
+    .order-lookup-card .section-title {
+      text-align: center;
+    }
+
+    .order-lookup-card .order-lookup-form {
+      width: 100%;
+      margin-top: 16px;
+    }
+
     .order-success-card h2 {
       margin: 0 0 14px;
       color: var(--rose);
@@ -1676,6 +1704,11 @@
         margin-left: 12px;
       }
 
+      .order-lookup-jump {
+        width: min(190px, calc(100% - 24px));
+        margin-left: 12px;
+      }
+
       .cart-field-row {
         display: contents;
       }
@@ -1809,24 +1842,9 @@
     <img src="assets/short-video-button-2.webp" alt="" aria-hidden="true" width="1000" height="333" decoding="async">
   </a>
 
-  <a class="order-lookup-jump" href="#orderLookup" aria-label="查詢訂單進度">
-    <img src="assets/order-lookup-button.webp" alt="查詢訂單進度" width="760" height="376" decoding="async">
-  </a>
-
-  <section class="section section-centered" id="orderLookup" aria-labelledby="orderLookupTitle">
-    <div class="section-title">
-      <h2 id="orderLookupTitle">查詢訂單進度</h2>
-      <p>請輸入訂單編號與下單時填寫的聯絡電話</p>
-    </div>
-    <form class="order-lookup-form" id="orderLookupForm" novalidate>
-      <label for="lookupOrderNumber">訂單編號</label>
-      <input class="cart-input" id="lookupOrderNumber" name="orderNumber" type="text" maxlength="14" autocomplete="off" placeholder="例如 EH260928ABC234" required>
-      <label for="lookupPhone">聯絡電話</label>
-      <input class="cart-input" id="lookupPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="請輸入下單電話" required>
-      <button class="submit-order" type="submit" id="lookupOrderSubmit">查詢進度</button>
-      <p id="orderLookupResult" role="status" aria-live="polite"></p>
-    </form>
-  </section>
+  <button class="order-lookup-jump" type="button" id="openOrderLookup" aria-label="查詢訂單進度">
+    <img src="assets/order-lookup-button.webp" alt="查詢訂單進度" width="760" height="253" decoding="async">
+  </button>
 
   <section class="hero" id="top" aria-label="Emily 手作工坊主視覺">
     <picture>
@@ -1924,6 +1942,24 @@
       <h2 id="purchaseGuideTitle" class="sr-only">購買流程</h2>
       <button class="guide-modal-close" type="button" id="closePurchaseGuide" aria-label="關閉購買流程">×</button>
       <img class="guide-modal-image" src="process v1.png" alt="Emily 手作工坊購買流程圖" loading="lazy">
+    </div>
+  </div>
+
+  <div class="guide-modal" id="orderLookupModal" role="dialog" aria-modal="true" aria-labelledby="orderLookupTitle" aria-hidden="true">
+    <div class="order-lookup-card">
+      <button class="guide-modal-close" type="button" id="closeOrderLookup" aria-label="關閉查詢訂單">×</button>
+      <div class="section-title">
+        <h2 id="orderLookupTitle">查詢訂單進度</h2>
+        <p>請輸入訂單編號與下單時填寫的聯絡電話</p>
+      </div>
+      <form class="order-lookup-form" id="orderLookupForm" novalidate>
+        <label for="lookupOrderNumber">訂單編號</label>
+        <input class="cart-input" id="lookupOrderNumber" name="orderNumber" type="text" maxlength="14" autocomplete="off" placeholder="例如 EH260928ABC234" required>
+        <label for="lookupPhone">聯絡電話</label>
+        <input class="cart-input" id="lookupPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="請輸入下單電話" required>
+        <button class="submit-order" type="submit" id="lookupOrderSubmit">查詢進度</button>
+        <p id="orderLookupResult" role="status" aria-live="polite"></p>
+      </form>
     </div>
   </div>
 
@@ -2041,6 +2077,8 @@
     const lookupPhone = document.getElementById("lookupPhone");
     const lookupOrderSubmit = document.getElementById("lookupOrderSubmit");
     const orderLookupResult = document.getElementById("orderLookupResult");
+    const orderLookupModal = document.getElementById("orderLookupModal");
+    const closeOrderLookup = document.getElementById("closeOrderLookup");
 
     const sampleProducts = [
       {
@@ -3137,6 +3175,24 @@
       document.body.style.overflow = "";
     }
 
+    function closeOrderLookupModal() {
+      orderLookupModal.classList.remove("open");
+      orderLookupModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    document.getElementById("openOrderLookup").addEventListener("click", () => {
+      orderLookupModal.classList.add("open");
+      orderLookupModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      lookupOrderNumber.focus();
+    });
+
+    closeOrderLookup.addEventListener("click", closeOrderLookupModal);
+    orderLookupModal.addEventListener("click", event => {
+      if (event.target === orderLookupModal) closeOrderLookupModal();
+    });
+
     document.getElementById("openPurchaseGuide").addEventListener("click", () => {
       purchaseGuideModal.classList.add("open");
       purchaseGuideModal.setAttribute("aria-hidden", "false");
@@ -3222,6 +3278,9 @@
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && purchaseGuideModal.classList.contains("open")) {
         closePurchaseGuideModal();
+      }
+      if (event.key === "Escape" && orderLookupModal.classList.contains("open")) {
+        closeOrderLookupModal();
       }
       if (event.key === "Escape" && orderSuccessModal.classList.contains("open")) {
         closeOrderSuccessModal();
