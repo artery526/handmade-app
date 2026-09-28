@@ -193,8 +193,8 @@
 
     .order-lookup-jump {
       display: block;
-      flex: 0 0 150px;
-      width: 150px;
+      flex: 0 0 140px;
+      width: 140px;
       margin: 0;
       overflow: hidden;
       border-radius: 18px;
@@ -1714,15 +1714,22 @@
       }
 
       .order-lookup-jump {
-        width: 150px;
+        flex: 0 0 140px;
+        width: 140px;
       }
 
       .jump-actions {
         width: calc(100% - 24px);
         margin-left: 12px;
         padding-left: 0;
-        flex-direction: column;
+        flex-direction: row;
         gap: 8px;
+      }
+
+      .jump-actions .short-video-jump {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
       }
 
       .cart-field-row {
