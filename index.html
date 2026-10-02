@@ -2404,7 +2404,8 @@
           description: pick(row, ["描述", "說明", "介紹", "description"]),
           spec: pick(row, ["規格", "尺寸", "備註", "spec"]),
           popular: ["y", "yes", "true", "1", "是"].includes(popularText),
-          sort: Number(pick(row, ["排序", "sort"])) || 999
+          sort: Number(pick(row, ["排序", "sort"])) || 999,
+          sheetRowIndex: index
         };
       }).filter(item => item.listed && item.name);
     }
@@ -2792,7 +2793,14 @@
     }
 
     function sortProductsForDisplay(items) {
-      if (activeCategory !== "全部") return items;
+      if (activeCategory !== "全部") {
+        return [...items].sort((a, b) => {
+          const rowA = Number.isFinite(a.sheetRowIndex) ? a.sheetRowIndex : null;
+          const rowB = Number.isFinite(b.sheetRowIndex) ? b.sheetRowIndex : null;
+          if (rowA !== null && rowB !== null) return rowB - rowA;
+          return a.sort - b.sort || a.name.localeCompare(b.name, "zh-Hant");
+        });
+      }
       return [...items].sort((a, b) => {
         const sortA = Number.isFinite(a.sort) ? a.sort : 0;
         const sortB = Number.isFinite(b.sort) ? b.sort : 0;
