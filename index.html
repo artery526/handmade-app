@@ -797,6 +797,20 @@
       gap: 10px;
     }
 
+    .shipping-promise {
+      margin: 12px 0 8px;
+      padding: 6px 8px;
+      border-radius: 7px;
+      background: rgba(246, 228, 210, 0.58);
+      color: #755b45;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-align: center;
+      white-space: nowrap;
+    }
+
     .popular-cart-button {
       width: 132px;
       height: 44px;
@@ -1558,6 +1572,19 @@
       font-size: 18px;
     }
 
+    .cart-shipping-note {
+      margin: -4px 0 12px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(246, 228, 210, 0.58);
+      color: #755b45;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.5;
+      text-align: center;
+    }
+
     .cart-form {
       display: grid;
       gap: 10px;
@@ -1844,6 +1871,13 @@
         width: 120px;
       }
 
+      .shipping-promise {
+        padding-right: 4px;
+        padding-left: 4px;
+        font-size: 11px;
+        letter-spacing: -0.02em;
+      }
+
       .schema {
         grid-template-columns: 1fr;
       }
@@ -2023,6 +2057,7 @@
           <span>總金額</span>
           <span class="cart-total-value" id="cartTotal">NT$0</span>
         </div>
+        <p class="cart-shipping-note" id="cartShippingNote">🚚 7-11／全家店到店　｜　📦 貨到付款代收費 65 元會自動計入總金額</p>
       <form class="cart-form" id="orderForm" novalidate>
         <div class="cart-field-row">
           <label class="cart-field" for="buyerName">
@@ -2259,6 +2294,7 @@
     const cartList = document.getElementById("cartList");
     const cartCount = document.getElementById("cartCount");
     const cartTotal = document.getElementById("cartTotal");
+    const cartShippingNote = document.getElementById("cartShippingNote");
     const purchaseGuideModal = document.getElementById("purchaseGuideModal");
     const closePurchaseGuide = document.getElementById("closePurchaseGuide");
     const orderSuccessModal = document.getElementById("orderSuccessModal");
@@ -2615,6 +2651,7 @@
               </div>
               ${specLabel ? `<p class="popular-spec">${escapeHtml(specLabel)}</p>` : ""}
               ${variantSwitchHtml(item, displayItem)}
+              <p class="shipping-promise">🚚 7-11／全家店到店　｜　📦 貨到付款</p>
               <div class="popular-foot">
                 <div class="price">${formatPrice(displayItem.price)}</div>
                 <button class="popular-cart-button" type="button" data-id="${escapeAttr(displayItem.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(displayItem.name)} 到購物車">${soldOut ? "已售完" : '<img src="assets/add-to-cart.webp" alt="">'}</button>
@@ -2802,6 +2839,7 @@
               <p class="product-desc">${escapeHtml(displayItem.description || displayItem.spec || "手作作品資訊整理中，歡迎先加入購物車。")}</p>
               ${variantSwitchHtml(item, displayItem)}
               ${productOptionHtml(displayItem)}
+              <p class="shipping-promise">🚚 7-11／全家店到店　｜　📦 貨到付款</p>
               <div class="product-foot">
                 <div class="price">${formatPrice(displayItem.price)}</div>
                 <button class="add-button" type="button" data-id="${escapeAttr(displayItem.id)}" ${soldOut ? "disabled" : ""} aria-label="加入 ${escapeAttr(displayItem.name)} 到購物車">${soldOut ? "已售完" : '<img src="assets/add-to-cart.webp" alt="">'}</button>
@@ -2845,6 +2883,9 @@
       cartTotal.innerHTML = cart.length
         ? `${formatPrice(subtotal)} <span class="cod-fee">+${CASH_ON_DELIVERY_FEE}</span> <span>=</span> ${formatPrice(total)}`
         : formatPrice(0);
+      cartShippingNote.textContent = cart.length
+        ? `🚚 7-11／全家店到店　｜　📦 貨到付款代收費 ${CASH_ON_DELIVERY_FEE} 元已計入總金額`
+        : `🚚 7-11／全家店到店　｜　📦 貨到付款代收費 ${CASH_ON_DELIVERY_FEE} 元會自動計入總金額`;
 
       if (!cart.length) {
         cartList.innerHTML = '<div class="empty">先把喜歡的作品加入購物車。</div>';
