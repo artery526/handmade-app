@@ -117,6 +117,38 @@
       text-transform: uppercase;
     }
 
+    .nav-brand-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .tarot-link {
+      min-height: 40px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(201, 130, 115, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.64);
+      color: #8d5d50;
+      font-family: "Noto Sans TC", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .tarot-link:hover,
+    .tarot-link:focus-visible {
+      transform: translateY(-1px);
+      background: #fff0e8;
+      color: #a65f4f;
+    }
+
     .nav-actions {
       display: flex;
       align-items: center;
@@ -1809,7 +1841,29 @@
 
       .nav {
         width: min(100% - 24px, 1120px);
-        height: 62px;
+        height: auto;
+        min-height: 62px;
+        padding: 8px 0;
+        flex-wrap: wrap;
+        gap: 2px 8px;
+      }
+
+      .nav-brand-group {
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .tarot-link {
+        min-height: 34px;
+        padding: 0 9px;
+        font-size: 11px;
+      }
+
+      .nav-actions {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 6px;
       }
 
       .brand strong {
@@ -1913,10 +1967,13 @@
 <body>
   <header class="site-header">
     <nav class="nav" aria-label="主選單">
-      <a class="brand" href="#top" aria-label="回到 Emily 手作工坊首頁">
-        <strong><span class="brand-emily">Emily</span><span class="brand-cn">手作工坊</span></strong>
-        <span class="brand-sub">Handmade with Love</span>
-      </a>
+      <div class="nav-brand-group">
+        <a class="brand" href="#top" aria-label="回到 Emily 手作工坊首頁">
+          <strong><span class="brand-emily">Emily</span><span class="brand-cn">手作工坊</span></strong>
+          <span class="brand-sub">Handmade with Love</span>
+        </a>
+        <a class="tarot-link" href="https://artery526.github.io/tarot-site/" target="_blank" rel="noopener noreferrer" aria-label="前往 Emily 塔羅小屋（在新分頁開啟）">前往 🔮 Emily塔羅小屋</a>
+      </div>
       <div class="nav-actions">
         <a class="line-link" href="https://lin.ee/tIxxtKg" target="_blank" rel="noopener noreferrer" aria-label="加入官方 LINE 好友">
           <img src="官方LINE.png" alt="">
