@@ -11,8 +11,10 @@ const ORDER_HEADERS = [
   '\u53D6\u8CA8\u8D85\u5546',
   '\u9580\u5E02\u540D\u7A31',
   '\u9580\u5E02\u5E97\u865F',
-  '\u8A02\u55AE\u662F\u5426\u5DF2\u8655\u7406'
+  '\u8A02\u55AE\u662F\u5426\u5DF2\u8655\u7406',
+  '\u7DB2\u9801\u9001\u51FA\u7E3D\u91D1\u984D'
 ];
+const ORDER_STATUS_COLUMN = ORDER_HEADERS.indexOf('\u8A02\u55AE\u662F\u5426\u5DF2\u8655\u7406') + 1;
 const MAX_ORDER_QUANTITY = 20;
 const ORDER_STATUSES = ['已接單', '待處理', '包貨中', '已出貨', '已結單'];
 
@@ -51,7 +53,7 @@ function lookupOrder_(parameters) {
   // Read only order number, phone, and status; other customer details stay untouched.
   const orderNumbers = sheet.getRange(2, 1, lastRow - 1, 1).getDisplayValues();
   const phones = sheet.getRange(2, 6, lastRow - 1, 1).getDisplayValues();
-  const statuses = sheet.getRange(2, 11, lastRow - 1, 1).getDisplayValues();
+  const statuses = sheet.getRange(2, ORDER_STATUS_COLUMN, lastRow - 1, 1).getDisplayValues();
   const matches = [];
   for (let index = 0; index < orderNumbers.length; index += 1) {
     const rowOrderNumber = String(orderNumbers[index][0] || '').trim().toUpperCase();
@@ -89,6 +91,9 @@ function doPost(e) {
     const pickupStore = String(payload.pickupStore || '').trim();
     const storeName = String(payload.storeName || '').trim();
     const storeCode = String(payload.storeCode || '').trim();
+    const totalAmount = payload.totalAmount === undefined || payload.totalAmount === ''
+      ? ''
+      : Number(payload.totalAmount);
     const items = parseItems_(payload.items);
 
     if (!name) {
@@ -113,6 +118,10 @@ function doPost(e) {
 
     if (String(payload.website || '').trim()) {
       return jsonResponse_({ ok: false, error: 'Spam check failed.' });
+    }
+
+    if (totalAmount !== '' && (!Number.isFinite(totalAmount) || totalAmount < 0)) {
+      return jsonResponse_({ ok: false, error: 'Invalid total amount.' });
     }
 
     const normalizedItems = items.map(normalizeOrderItem_).filter(Boolean);
@@ -145,7 +154,8 @@ function doPost(e) {
         pickupStore,
         storeName,
         storeCode,
-        '已接單'
+        '已接單',
+        totalAmount
       ]);
       const orderRow = sheet.getLastRow();
       sheet.getRange(orderRow, 6).setNumberFormat('@').setValue(phone);
@@ -240,11 +250,11 @@ function ensureOrderHeaders_(sheet) {
     .requireValueInList(ORDER_STATUSES.concat(['否', '是', '已處理', '待確認']), true)
     .setAllowInvalid(false)
     .build();
-  const statusColumnRange = sheet.getRange(2, ORDER_HEADERS.length, Math.max(1, sheet.getMaxRows() - 1), 1);
+  const statusColumnRange = sheet.getRange(2, ORDER_STATUS_COLUMN, Math.max(1, sheet.getMaxRows() - 1), 1);
   statusColumnRange.setDataValidation(migrationValidation);
 
   if (lastRow > 1) {
-    const statusRange = sheet.getRange(2, ORDER_HEADERS.length, lastRow - 1, 1);
+    const statusRange = sheet.getRange(2, ORDER_STATUS_COLUMN, lastRow - 1, 1);
     const statuses = statusRange.getValues();
     let changed = false;
     statuses.forEach(row => {
@@ -282,7 +292,7 @@ function getPendingOrderCount_() {
     return 0;
   }
 
-  const statuses = sheet.getRange(2, ORDER_HEADERS.length, lastRow - 1, 1).getDisplayValues();
+  const statuses = sheet.getRange(2, ORDER_STATUS_COLUMN, lastRow - 1, 1).getDisplayValues();
   return statuses.reduce((count, row) => count + (normalizeOrderStatus_(row[0]) === '已結單' ? 0 : 1), 0);
 }
 

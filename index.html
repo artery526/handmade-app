@@ -2970,7 +2970,7 @@
     function renderCart() {
       const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
       const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-      const total = subtotal + (cart.length ? CASH_ON_DELIVERY_FEE : 0);
+      const total = getCartTotalAmount();
       cartCount.textContent = totalQty;
       cartTotal.innerHTML = cart.length
         ? `${formatPrice(subtotal)} <span class="cod-fee">+${CASH_ON_DELIVERY_FEE}</span> <span>=</span> ${formatPrice(total)}`
@@ -3006,6 +3006,11 @@
           renderCart();
         });
       });
+    }
+
+    function getCartTotalAmount() {
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      return subtotal + (cart.length ? CASH_ON_DELIVERY_FEE : 0);
     }
 
     function createCaptcha() {
@@ -3105,6 +3110,7 @@
       formData.set("storeName", selectedStoreName);
       formData.set("storeCode", storeCode.value.trim());
       formData.set("items", JSON.stringify(submittedItems));
+      formData.set("totalAmount", String(getCartTotalAmount()));
       formData.set("website", websiteField.value.trim());
 
       submitOrder.disabled = true;
